@@ -244,10 +244,13 @@
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.3s ease, transform 0.3s ease;
+            height: 0; /* 初始高度為0，不佔空間 */
+            overflow: hidden; /* 隱藏溢出內容 */
         }
         .copy-success-message.show {
             opacity: 1;
             transform: translateY(0);
+            height: auto; /* 顯示時恢復高度 */
         }
 
         /* Hero Section */
@@ -319,13 +322,18 @@
         }
 
         /* Hero 文本和按鈕動畫 */
+        /* 將 .reveal 類添加到這些元素，然後在 JS 中直接觸發它們的 active 狀態 */
         #hero h1, #hero h2, #hero .btn-group {
             opacity: 0;
-            animation-fill-mode: forwards;
+            animation-fill-mode: forwards; /* 保持動畫結束狀態 */
         }
-        #hero h1 { animation-delay: 0.5s; }
-        #hero h2 { animation-delay: 1s; }
-        #hero .btn-group { animation-delay: 1.5s; opacity: 0; animation: fadeIn 1.5s ease-out forwards; } /* 確保按鈕組動畫 */
+        /* 由於 .reveal-active 會直接設定 opacity: 1 和 transform: translateY(0)，
+           我們需要確保這些初始動畫的延遲在 JS 中處理，或者在 CSS 中直接設定 */
+        #hero h1.reveal-active { animation: fadeInTop 1s ease-out 0.5s forwards; }
+        #hero h2.reveal-active { animation: fadeIn 1.5s ease-out 1s forwards; }
+        #hero .btn-group.reveal-active { animation: fadeIn 1.5s ease-out 1.5s forwards; }
+        #hero .hero-image.reveal-active { animation: zoomIn 1.2s ease-out forwards; }
+
 
         @keyframes fadeInTop {
             from { opacity: 0; transform: translateY(-30px); }
@@ -345,6 +353,8 @@
             max-width: 100%;
             height: auto;
             margin-top: 20px;
+            border-radius: 8px; /* 增加圓角 */
+            box-shadow: var(--shadow-light); /* 增加輕微陰影 */
         }
 
         /* --- Scroll Reveal Animation --- */
@@ -759,33 +769,40 @@
             }
 
             /* Navbar Adjustments for Mobile */
+            .navbar {
+                padding: 10px 0; /* 縮小 navbar 高度 */
+            }
             .navbar .container {
                 justify-content: space-between; /* 保持 logo 和 menu-toggle 分散 */
             }
             .navbar .logo {
                 font-size: 1.5rem;
+                flex-shrink: 1; /* 允許標誌縮小以避免溢出 */
+                min-width: 0; /* 確保在極端情況下不會保持過寬 */
+                margin-right: 10px; /* 增加與漢堡選單的間距 */
             }
             .navbar .nav-links {
                 /* 預設隱藏 */
                 display: none; 
                 flex-direction: column;
-                position: absolute; /* 全屏覆蓋 */
-                top: 70px; /* 位於 navbar 下方 */
+                position: fixed; /* 變為固定定位，覆蓋整個螢幕 */
+                top: 0; /* 從頂部開始 */
                 left: 0;
                 width: 100%;
+                height: 100%; /* 全高 */
                 background: rgba(255, 255, 255, 0.98);
                 box-shadow: var(--shadow-medium);
-                padding: 20px 0;
-                border-top: 1px solid #eee;
-                max-height: 0; /* 用於動畫 */
-                overflow: hidden; /* 隱藏溢出內容 */
-                transition: max-height 0.4s ease-out; /* 平滑展開/收起 */
+                padding: 80px 0 20px; /* 為 navbar 騰出空間 */
+                max-height: 100vh; /* 確保可以滾動 */
+                overflow-y: auto; /* 允許在內容過多時滾動 */
+                transition: transform 0.4s ease-out; /* 使用 transform 進行動畫 */
+                transform: translateX(100%); /* 初始時向右隱藏 */
                 z-index: 998; /* 低於 menu-toggle */
             }
             /* 菜單展開時的樣式 */
             .navbar .nav-links.active {
                 display: flex; /* 顯示 */
-                max-height: 300px; /* 足夠顯示所有連結的高度 */
+                transform: translateX(0); /* 滑入 */
             }
             .navbar .nav-links li {
                 margin: 0;
@@ -890,6 +907,7 @@
 
             .raccoon-smart-tips {
                 padding: 30px;
+                transform: rotateZ(0deg); /* 手機版不傾斜 */
             }
             .raccoon-smart-tips h3 {
                 font-size: 1.6rem;
@@ -906,6 +924,7 @@
 
             .qr-code-section {
                 padding: 30px;
+                transform: scale(1); /* 手機版不縮小 */
             }
             .qr-code-section img {
                 max-width: 150px;
@@ -1011,8 +1030,8 @@
     <!-- Hero Section -->
     <section id="hero">
         <div class="container">
-            <h1>告別枯燥數字，迎接聰明理財新生活！</h1>
-            <h2>記帳小浣熊，LINE 上最聰明的 AI 記帳夥伴，徹底改變你的理財體驗！</h2>
+            <h1 class="reveal">告別枯燥數字，迎接聰明理財新生活！</h1>
+            <h2 class="reveal">記帳小浣熊，LINE 上最聰明的 AI 記帳夥伴，徹底改變你的理財體驗！</h2>
             <!-- 英雄區塊圖片：展示理財成功、富裕的感覺 -->
             <img class="hero-image reveal" alt="一隻可愛的卡通風格浣熊戴著眼鏡，手持計算機，背景是LINE對話框和科技感十足的AI元素，展現理財成功後的輕鬆富裕感。" src="image/Accounting-Raccoon-Rich.png">
             <div class="btn-group reveal">
@@ -1037,14 +1056,14 @@
                     <!-- 頂尖 AI 驅動圖片 -->
                     <img class="card-image" alt="卡通浣熊正在擔憂或思考金錢問題，暗示AI記帳能解決這些煩惱。" src="image/Accounting-Raccoon-Worry.png">
                 </div>
-                <div class="feature-card reveal">
+                <div class="feature-card reveal delay-1">
                     <i class="fas fa-comment-dots icon"></i>
                     <h3>聰明又可愛的角色互動</h3>
                     <p>非記帳訊息由具「浣熊性格」的 AI 回覆，偶爾調皮、偶爾貼心，陪你聊聊生活與金錢哲學。</p>
                     <!-- 聰明又可愛的角色互動圖片 -->
                     <img class="card-image" alt="可愛的卡通浣熊AI在LINE對話中與用戶互動，展現調皮或貼心的回答。" src="image/Accounting-Raccoon-lineline.png">
                 </div>
-                <div class="feature-card reveal">
+                <div class="feature-card reveal delay-2">
                     <i class="fab fa-line icon"></i>
                     <h3>LINE 原生體驗</h3>
                     <p>告別複雜 App，無需下載，只需在 LINE 對話，就能記帳、查帳、互動。輕量、快速、直覺！</p>
@@ -1068,7 +1087,7 @@
                         <span class="example">範例：「昨天中午吃了雞排 120」</span>
                     </div>
                 </div>
-                <div class="function-item reveal">
+                <div class="function-item reveal delay-1">
                     <i class="fas fa-hand-holding-usd" style="color:#32cd32;"></i>
                     <div class="content">
                         <h4>記錄收入 (進帳)</h4>
@@ -1076,7 +1095,7 @@
                         <span class="example">範例：「收入薪水 30000」</span>
                     </div>
                 </div>
-                <div class="function-item reveal">
+                <div class="function-item reveal delay-2">
                     <i class="fas fa-search-dollar" style="color:#1e90ff;"></i>
                     <div class="content">
                         <h4>即時查帳</h4>
@@ -1084,7 +1103,7 @@
                         <span class="example">範例：「查帳」</span>
                     </div>
                 </div>
-                <div class="function-item reveal">
+                <div class="function-item reveal delay-3">
                     <i class="fas fa-trash-alt" style="color:#808080;"></i>
                     <div class="content">
                         <h4>刪除錯誤記錄</h4>
@@ -1092,7 +1111,7 @@
                         <span class="example">範例：「刪除」</span>
                     </div>
                 </div>
-                <div class="function-item reveal">
+                <div class="function-item reveal delay-4">
                     <i class="fas fa-question-circle" style="color:#ffd700;"></i>
                     <div class="content">
                         <h4>查看指令</h4>
@@ -1102,7 +1121,7 @@
                 </div>
             </div>
 
-            <div class="raccoon-smart-tips reveal">
+            <div class="raccoon-smart-tips reveal delay-5">
                 <h3><i class="fas fa-lightbulb" style="color: var(--accent-color-2);"></i> 浣熊的小聰明</h3>
                 <ul>
                     <li><i class="fas fa-check-circle"></i> 看到「早餐」、「午餐」、「晚餐」等字眼，會自動歸類為「餐飲」 <i class="fas fa-utensils"></i>。</li>
@@ -1123,18 +1142,18 @@
                     <h3>智慧化</h3>
                     <p>Gemini AI 解析自然語言，快速分類，讓記帳更聰明。</p>
                 </div>
-                <div class="choose-card reveal">
+                <div class="choose-card reveal delay-1">
                     <i class="fas fa-mobile-alt icon"></i>
                     <h3>便利性</h3>
                     <p>LINE 原生操作，隨手記帳不費力，隨時隨地輕鬆管理財務。</p>
                 </div>
-                <div class="choose-card reveal">
+                <div class="choose-card reveal delay-2">
                     <i class="fas fa-grin-beam icon"></i>
                     <h3>趣味性</h3>
                     <p>可愛浣熊互動，讓記帳不再枯燥，而是充滿樂趣的對話。</p>
                 </div>
             </div>
-            <p class="reveal" style="margin-top: 50px; font-size: 1.2rem; color: var(--dark-bg);">記帳小浣熊，讓理財變得更自然、更有趣。不只是幫你算錢，更幫你理解「錢」這件事。 <i class="fas fa-lightbulb"></i></p>
+            <p class="reveal delay-3" style="margin-top: 50px; font-size: 1.2rem; color: var(--dark-bg);">記帳小浣熊，讓理財變得更自然、更有趣。不只是幫你算錢，更幫你理解「錢」這件事。 <i class="fas fa-lightbulb"></i></p>
         </div>
     </section>
 
@@ -1160,7 +1179,7 @@
                     <!-- 加入 LINE 機器人步驟圖片 -->
                     <img class="card-image" alt="卡通浣熊展示如何掃描QR碼加入LINE機器人。" src="image/Accounting-Raccoon-scan.png">
                 </div>
-                <div class="join-step-card reveal">
+                <div class="join-step-card reveal delay-1">
                     <h3><i class="fas fa-pen-to-square"></i> 2. 開始記帳！</h3>
                     <ul>
                         <li><i class="fas fa-pizza-slice"></i> 支出範例: 午餐 120</li>
@@ -1171,7 +1190,7 @@
                     <!-- 開始記帳步驟圖片 -->
                     <img class="card-image" alt="卡通浣熊展示在LINE中輸入記帳指令的場景。" src="image/Accounting-Raccoon-write.png">
                 </div>
-                <div class="join-step-card reveal">
+                <div class="join-step-card reveal delay-2">
                     <h3><i class="fas fa-comments"></i> 3. 享受智慧互動</h3>
                     <p>不只記帳，還能和小浣熊聊聊日常、問理財問題或放空一下。</p>
                     <!-- 享受智慧互動步驟圖片 -->
@@ -1284,6 +1303,13 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('reveal-active');
+                        // 移除 .delay-* 類，避免與 CSS 中的動畫衝突
+                        // 如果 delay 已經在 CSS keyframe 中定義，則可以省略此步驟
+                        // entry.target.classList.forEach(className => {
+                        //     if (className.startsWith('delay-')) {
+                        //         entry.target.classList.remove(className);
+                        //     }
+                        // });
                         observer.unobserve(entry.target); // 一旦動畫觸發，就不再觀察
                     }
                 });
@@ -1293,21 +1319,21 @@
             });
 
             revealElements.forEach(element => {
-                // 檢查是否為 .hero-image 或 .btn-group
-                // 這兩個元素在 CSS 中已有初始動畫，不應被 .reveal 的初始 opacity: 0 覆蓋
-                // 因此，我們在 DOMContentLoaded 後，直接給它們添加 reveal-active，讓它們按照 CSS 的 delay 立即執行
-                if (element.classList.contains('hero-image') || element.classList.contains('btn-group')) {
+                // 為 Hero 區塊的元素直接觸發動畫，因為它們是頁面首次載入即應顯示的
+                if (element.closest('#hero') && (element.tagName === 'H1' || element.tagName === 'H2' || element.classList.contains('btn-group') || element.classList.contains('hero-image'))) {
                     element.classList.add('reveal-active');
-                    // 由於它們已經通過 CSS 動畫顯示，我們不需要 IntersectionObserver 來處理它們
                 } else {
                     observer.observe(element);
                 }
             });
         });
 
-        // Replace <a> with <button> for hero buttons for better semantic and clickability
-        document.querySelector('#hero .btn-group a:first-child').outerHTML = '<button onclick="window.location.href=\'#join-us\'" class="btn"><i class="fab fa-line"></i> 立即體驗</button>';
-        document.querySelector('#hero .btn-group a:last-child').outerHTML = '<button onclick="window.location.href=\'#core-features\'" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></button>';
+        // Replace <a> with <button> for hero buttons for better semantic and clickability (already done in your HTML now)
+        // I've removed the JS that was replacing these, as they are now correctly defined as buttons in the HTML.
+        // If your original HTML had <a> tags and you wanted to replace them, the original JS was:
+        // document.querySelector('#hero .btn-group a:first-child').outerHTML = '<button onclick="window.location.href=\'#join-us\'" class="btn"><i class="fab fa-line"></i> 立即體驗</button>';
+        // document.querySelector('#hero .btn-group a:last-child').outerHTML = '<button onclick="window.location.href=\'#core-features\'" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></button>';
+        // But since they are already <button> in your provided HTML, this JS is not needed and would cause errors if run.
     </script>
 </body>
 </html>
