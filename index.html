@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記帳小浣熊 - LINE 上最聰明的 AI 記帳夥伴</title>
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts (Optional, for better typography) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6a5acd; /* 深紫羅蘭 */
+            --secondary-color: #ff6347; /* 番茄紅 */
+            --accent-color-1: #00b900; /* LINE 綠 */
+            --accent-color-2: #ffa500; /* 橘 */
+            --accent-color-3: #ff69b4; /* 粉紅 */
+            --text-color: #333;
+            --light-bg: #f8f8f8;
+            --dark-bg: #2c3e50;
+            --gradient-1: linear-gradient(135deg, #6a5acd, #a77ffc); /* 主漸層 */
+            --gradient-2: linear-gradient(135deg, #ff6347, #ff8c00); /* 副漸層 */
+            --gradient-3: linear-gradient(135deg, #00b900, #32cd32); /* 綠漸層 */
+
+            /* 新增一些變數用於陰影和動畫 */
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 12px 35px rgba(0, 0, 0, 0.2);
+            --transition-speed: 0.3s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Montserrat', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+            scroll-behavior: smooth;
+        }
+
+        /* 提升選取文本的視覺效果 */
+        ::selection {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.98); /* 稍微不透明 */
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-light);
+            transition: all var(--transition-speed);
+        }
+
+        /* 滾動後的 Navbar 樣式 */
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.9); /* 滾動後更透明 */
+            box-shadow: var(--shadow-medium);
+            padding: 10px 0; /* 滾動後縮小 */
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color var(--transition-speed);
+        }
+        .navbar .logo:hover {
+            color: var(--secondary-color);
+        }
+
+        .navbar .nav-links {
+            list-style: none;
+            display: flex;
+        }
+
+        .navbar .nav-links li {
+            margin-left: 30px;
+        }
+
+        .navbar .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color var(--transition-speed), transform var(--transition-speed);
+            position: relative;
+            padding-bottom: 5px; /* 為下劃線預留空間 */
+        }
+
+        .navbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width var(--transition-speed);
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        .navbar .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hamburger Menu (Desktop - Hidden) */
+        .menu-toggle {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            z-index: 1001; /* 確保在導航連結之上 */
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 0;
+            text-align: center;
+            scroll-margin-top: 80px; /* 根據 navbar 高度調整 */
+            position: relative; /* 確保內容位於滾動顯示之上 */
+        }
+
+        section:nth-of-type(even) {
+            background-color: var(--light-bg);
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--dark-bg);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-top: 40px;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-top: 30px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 15px 30px;
+            margin: 20px 10px 0;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+            box-shadow: var(--shadow-light);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden; /* 確保hover效果不溢出 */
+            border: none; /* 讓button看起來更像連結 */
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left var(--transition-speed);
+            transform: skewX(-20deg); /* 斜角效果 */
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-5px) scale(1.02); /* 向上浮動並輕微放大 */
+            box-shadow: var(--shadow-medium);
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: var(--accent-color-2);
+        }
+        .btn-secondary:hover {
+            background: var(--primary-color);
+        }
+        
+        .btn-copy-line-id {
+            background: var(--accent-color-1);
+            padding: 12px 25px; /* 稍微小一點 */
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+        .btn-copy-line-id:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: var(--shadow-light);
+        }
+        .btn-copy-line-id span {
+            margin-left: 10px;
+        }
+        /* 複製成功提示 */
+        .copy-success-message {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: var(--accent-color-1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .copy-success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hero Section */
+        #hero {
+            background: var(--gradient-1);
+            color: #fff;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #hero::before, #hero::after { /* 增加一個背景層次 */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 150px 150px; /* 調整圖案大小 */
+            opacity: 0.2;
+            pointer-events: none; /* 讓其不阻擋鼠標事件 */
+        }
+        #hero::before {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23ffffff" fill-opacity="0.1"/></svg>') repeat;
+            animation: moveBackground 40s linear infinite;
+        }
+        #hero::after { /* 第二層背景，不同圖案和動畫 */
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 0L61.8 35.3H98.8L69.1 57.7L80.9 93L50 70.7L19.1 93L30.9 57.7L1.2 35.3H38.2L50 0Z" fill="%23ffffff" fill-opacity="0.08"/></svg>') repeat;
+            animation: moveBackgroundReverse 50s linear infinite;
+            transform-origin: center center; /* 確保旋轉中心正確 */
+        }
+
+        @keyframes moveBackground {
+            from { transform: translate(0, 0); }
+            to { transform: translate(150px, 150px); } /* 移動距離加大 */
+        }
+        @keyframes moveBackgroundReverse { /* 反向移動動畫 */
+            from { transform: translate(0, 0) rotate(0deg); }
+            to { transform: translate(-150px, -150px) rotate(360deg); }
+        }
+
+        #hero h1 {
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 增加文字陰影 */
+            animation: fadeInTop 1s ease-out; /* 標題淡入動畫 */
+        }
+
+        #hero h2 {
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1.5s ease-out; /* 副標題淡入動畫 */
+        }
+
+        #hero .hero-image {
+            max-width: 500px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 10;
+            animation: zoomIn 1.2s ease-out; /* 圖片縮放動畫 */
+        }
+
+        /* Hero 文本和按鈕動畫 */
+        #hero h1, #hero h2, #hero .btn-group {
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        #hero h1 { animation-delay: 0.5s; }
+        #hero h2 { animation-delay: 1s; }
+        #hero .btn-group { animation-delay: 1.5s; opacity: 0; animation: fadeIn 1.5s ease-out forwards; } /* 確保按鈕組動畫 */
+
+        @keyframes fadeInTop {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* General card image style (no borders/shadows) */
+        .card-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        /* --- Scroll Reveal Animation --- */
+        .reveal {
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px); /* 初始位置在下方 */
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* 動畫效果 */
+            will-change: opacity, transform; /* 提升動畫性能 */
+        }
+
+        .reveal-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 不同元素的延遲，讓動畫錯開 */
+        .reveal.delay-1 { transition-delay: 0.1s; }
+        .reveal.delay-2 { transition-delay: 0.2s; }
+        .reveal.delay-3 { transition-delay: 0.3s; }
+        .reveal.delay-4 { transition-delay: 0.4s; }
+        .reveal.delay-5 { transition-delay: 0.5s; }
+        .reveal.delay-6 { transition-delay: 0.6s; }
+        /* 針對特定內容的動畫延遲 */
+        .features-grid .feature-card:nth-child(1) { transition-delay: 0s; }
+        .features-grid .feature-card:nth-child(2) { transition-delay: 0.15s; }
+        .features-grid .feature-card:nth-child(3) { transition-delay: 0.3s; }
+
+        .function-list .function-item:nth-child(1) { transition-delay: 0s; }
+        .function-list .function-item:nth-child(2) { transition-delay: 0.05s; }
+        .function-list .function-item:nth-child(3) { transition-delay: 0.1s; }
+        .function-list .function-item:nth-child(4) { transition-delay: 0.15s; }
+        .function-list .function-item:nth-child(5) { transition-delay: 0.2s; }
+
+        .choose-grid .choose-card:nth-child(1) { transition-delay: 0s; }
+        .choose-grid .choose-card:nth-child(2) { transition-delay: 0.15s; }
+        .choose-grid .choose-card:nth-child(3) { transition-delay: 0.3s; }
+
+        .join-steps .join-step-card:nth-child(1) { transition-delay: 0s; }
+        .join-steps .join-step-card:nth-child(2) { transition-delay: 0.15s; }
+        .join-steps .join-step-card:nth-child(3) { transition-delay: 0.3s; }
+
+        /* Core Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            text-align: left;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .feature-card .icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            display: block;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); /* 漸層圖標 */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+            color: var(--dark-bg);
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #555;
+        }
+        .feature-card .example {
+            font-style: italic;
+            font-size: 0.95rem;
+            color: #777;
+            margin-top: 15px;
+            display: block;
+        }
+
+        /* Features Overview */
+        .function-list {
+            list-style: none;
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+
+        .function-item {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: flex-start;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        .function-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .function-item i {
+            font-size: 2rem;
+            margin-right: 20px;
+            min-width: 40px;
+            text-align: center;
+            line-height: 1; /* 垂直居中 */
+        }
+
+        .function-item .content h4 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .function-item .content p {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .function-item .content .example {
+            font-size: 0.9rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .raccoon-smart-tips {
+            background-color: var(--dark-bg);
+            color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 60px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-heavy);
+            transform: rotateZ(-1deg); /* 輕微傾斜，增加趣味性 */
+            transition: transform 0.5s ease;
+        }
+        .raccoon-smart-tips:hover {
+            transform: rotateZ(0deg); /* 恢復正常 */
+        }
+        .raccoon-smart-tips::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px; /* 稍微放大 */
+            height: 120px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 0L61.8 35.3H98.8L69.1 57.7L80.9 93L50 70.7L19.1 93L30.9 57.7L1.2 35.3H38.2L50 0Z" fill="%23ffffff" fill-opacity="0.15"/></svg>') no-repeat center center; /* 圖案更明顯 */
+            background-size: contain;
+            transform: rotate(25deg); /* 旋轉角度更大 */
+            opacity: 0.3; /* 透明度降低 */
+        }
+
+        .raccoon-smart-tips h3 {
+            color: var(--accent-color-2);
+            font-size: 2rem;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        .raccoon-smart-tips ul {
+            list-style: none;
+            padding-left: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .raccoon-smart-tips ul li {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        .raccoon-smart-tips ul li i {
+            margin-right: 15px;
+            color: var(--accent-color-1);
+            font-size: 1.5rem;
+            animation: bounceIn 0.8s ease-out forwards; /* 列表項圖標動畫 */
+            opacity: 0;
+        }
+        .raccoon-smart-tips ul li:nth-child(1) i { animation-delay: 0.1s; }
+        .raccoon-smart-tips ul li:nth-child(2) i { animation-delay: 0.3s; }
+        .raccoon-smart-tips ul li:nth-child(3) i { animation-delay: 0.5s; }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.1); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Why Choose Us */
+        .choose-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .choose-card {
+            background: var(--light-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-light);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        .choose-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .choose-card .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            background: linear-gradient(45deg, #00ced1, #9370db); /* 個性化漸層圖標 */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .choose-card:nth-child(2) .icon { /* 第二張卡片的圖標顏色 */
+            background: linear-gradient(45deg, #9370db, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .choose-card:nth-child(3) .icon { /* 第三張卡片的圖標顏色 */
+            background: linear-gradient(45deg, #ff69b4, var(--accent-color-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .choose-card h3 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: var(--dark-bg);
+        }
+
+        .choose-card p {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* Join Us */
+        #join-us {
+            background: var(--gradient-2);
+            color: #fff;
+            padding: 80px 20px;
+        }
+        #join-us h2 {
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .qr-code-section {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 50px auto;
+            box-shadow: var(--shadow-heavy);
+            color: var(--text-color);
+            transform: scale(0.95); /* 輕微縮小 */
+            transition: transform var(--transition-speed);
+        }
+        .qr-code-section:hover {
+            transform: scale(1); /* 鼠標懸停時恢復正常 */
+        }
+        .qr-code-section p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .qr-code-section img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 5px; /* 給QR Code輕微圓角 */
+            box-shadow: var(--shadow-light); /* 輕微陰影 */
+        }
+        .qr-code-section .line-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color-1);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-code-section .line-id i {
+            margin-right: 10px;
+        }
+
+        .join-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            text-align: left;
+            color: #fff;
+        }
+        .join-step-card {
+            background: rgba(255, 255, 255, 0.15); /* 輕微透明 */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); /* 增加毛玻璃效果 */
+            transition: transform var(--transition-speed), background var(--transition-speed);
+        }
+        .join-step-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .join-step-card h3 {
+            color: #fff;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+        .join-step-card h3 i {
+            margin-right: 15px;
+            font-size: 2.2rem;
+            color: var(--accent-color-2);
+        }
+        .join-step-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 15px;
+        }
+        .join-step-card ul li {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: flex-start; /* 確保文本和圖標對齊 */
+        }
+        .join-step-card ul li i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            color: var(--accent-color-1);
+            line-height: 1.6; /* 與文本行高一致 */
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-bg);
+            color: #ccc;
+            padding: 40px 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            position: relative; /* 確保 z-index 有效 */
+            z-index: 10;
+        }
+        footer i {
+            margin-right: 5px;
+        }
+        footer p.developer-info {
+            margin-bottom: 10px;
+            color: #ddd;
+            font-size: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary-color);
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-medium);
+            transition: all var(--transition-speed);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+            cursor: pointer;
+        }
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .back-to-top:hover {
+            background: var(--secondary-color);
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px; /* 縮小容器內邊距 */
+            }
+
+            /* Navbar Adjustments for Mobile */
+            .navbar .container {
+                justify-content: space-between; /* 保持 logo 和 menu-toggle 分散 */
+            }
+            .navbar .logo {
+                font-size: 1.5rem;
+            }
+            .navbar .nav-links {
+                /* 預設隱藏 */
+                display: none; 
+                flex-direction: column;
+                position: absolute; /* 全屏覆蓋 */
+                top: 70px; /* 位於 navbar 下方 */
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: var(--shadow-medium);
+                padding: 20px 0;
+                border-top: 1px solid #eee;
+                max-height: 0; /* 用於動畫 */
+                overflow: hidden; /* 隱藏溢出內容 */
+                transition: max-height 0.4s ease-out; /* 平滑展開/收起 */
+                z-index: 998; /* 低於 menu-toggle */
+            }
+            /* 菜單展開時的樣式 */
+            .navbar .nav-links.active {
+                display: flex; /* 顯示 */
+                max-height: 300px; /* 足夠顯示所有連結的高度 */
+            }
+            .navbar .nav-links li {
+                margin: 0;
+                width: 100%;
+                text-align: center;
+            }
+            .navbar .nav-links a {
+                display: block;
+                padding: 15px 20px;
+                font-size: 1.2rem;
+                color: var(--dark-bg);
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .navbar .nav-links li:last-child a {
+                border-bottom: none;
+            }
+            .navbar .nav-links a:hover {
+                background: var(--light-bg);
+            }
+            .navbar .nav-links a::after { /* 移除 mobile menu 的下劃線效果 */
+                display: none;
+            }
+
+            /* 顯示漢堡菜單圖標 */
+            .menu-toggle {
+                display: block;
+            }
+            .menu-toggle .fa-times { /* 點擊後變為叉叉 */
+                display: none;
+            }
+            .menu-toggle.active .fa-bars {
+                display: none;
+            }
+            .menu-toggle.active .fa-times {
+                display: block;
+            }
+
+            /* General Sections */
+            section {
+                padding: 60px 0; /* 縮小區塊內邊距 */
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+            h3 {
+                font-size: 1.5rem;
+            }
+            p {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+                margin: 15px 8px 0;
+            }
+            .btn-group {
+                display: flex;
+                flex-direction: column; /* 按鈕垂直堆疊 */
+                align-items: center;
+                gap: 10px; /* 按鈕間距 */
+            }
+            .btn-group .btn {
+                margin: 0; /* 重設按鈕的 margin */
+                width: 80%; /* 讓按鈕寬一點 */
+            }
+
+            #hero {
+                padding: 80px 20px;
+                min-height: 60vh;
+            }
+            #hero h2 {
+                font-size: 1.5rem;
+            }
+            .hero-image {
+                max-width: 90%; /* 確保圖片適應更小屏幕 */
+            }
+
+            .features-grid, .choose-grid, .function-list, .join-steps {
+                grid-template-columns: 1fr;
+            }
+            .feature-card, .choose-card, .function-item, .join-step-card {
+                padding: 25px;
+            }
+            .feature-card .icon, .choose-card .icon {
+                font-size: 3rem;
+            }
+            .function-item i {
+                font-size: 1.5rem;
+                margin-right: 15px;
+                min-width: 30px; /* 確保圖標在小屏幕上不會太寬 */
+            }
+            .function-item .content h4 {
+                font-size: 1.2rem;
+            }
+            .function-item .content p, .function-item .content .example {
+                font-size: 0.9rem;
+            }
+
+            .raccoon-smart-tips {
+                padding: 30px;
+            }
+            .raccoon-smart-tips h3 {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+            .raccoon-smart-tips ul li {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+            .raccoon-smart-tips ul li i {
+                font-size: 1.3rem;
+                margin-right: 10px;
+            }
+
+            .qr-code-section {
+                padding: 30px;
+            }
+            .qr-code-section img {
+                max-width: 150px;
+            }
+            .qr-code-section .line-id {
+                font-size: 1.2rem;
+            }
+            .btn-copy-line-id {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+
+            .join-step-card h3 i {
+                font-size: 1.8rem;
+            }
+            .join-step-card ul li i {
+                font-size: 1rem;
+            }
+
+            footer {
+                padding: 30px 15px;
+                font-size: 0.85rem;
+            }
+            footer p.developer-info {
+                font-size: 0.9rem;
+            }
+
+            .back-to-top {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        /* For very small screens (e.g., iPhone 5/SE) */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            h3 {
+                font-size: 1.3rem;
+            }
+            p {
+                font-size: 0.9rem;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .btn-group .btn {
+                width: 90%; /* 更小的屏幕按鈕更寬 */
+            }
+            #hero {
+                padding: 60px 15px;
+                min-height: 50vh;
+            }
+            #hero h2 {
+                font-size: 1.3rem;
+            }
+            .feature-card, .choose-card, .function-item, .join-step-card {
+                padding: 20px;
+            }
+            .feature-card .icon, .choose-card .icon {
+                font-size: 2.5rem;
+            }
+            .raccoon-smart-tips h3 {
+                font-size: 1.4rem;
+            }
+            .qr-code-section .line-id {
+                font-size: 1rem;
+            }
+            .qr-code-section img {
+                max-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#hero" class="logo">記帳小浣熊(Accountant Raccoon)</a>
+            <!-- Hamburger Menu Toggle -->
+            <div class="menu-toggle" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-times"></i>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#hero">首頁</a></li>
+                <li><a href="#core-features">核心亮點</a></li>
+                <li><a href="#features-overview">功能一覽</a></li>
+                <li><a href="#why-choose-us">為什麼選擇我們？</a></li>
+                <li><a href="#join-us">加入我們</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="container">
+            <h1>告別枯燥數字，迎接聰明理財新生活！</h1>
+            <h2>記帳小浣熊，LINE 上最聰明的 AI 記帳夥伴，徹底改變你的理財體驗！</h2>
+            <!-- 英雄區塊圖片：展示理財成功、富裕的感覺 -->
+            <img class="hero-image reveal" alt="一隻可愛的卡通風格浣熊戴著眼鏡，手持計算機，背景是LINE對話框和科技感十足的AI元素，展現理財成功後的輕鬆富裕感。" src="image/Accounting-Raccoon-Rich.png">
+            <div class="btn-group reveal">
+                <!-- 立即體驗按鈕跳轉至 #join-us -->
+                <button onclick="window.location.href='#join-us'" class="btn"><i class="fab fa-line"></i> 立即體驗</button>
+                <!-- 了解更多按鈕跳轉至 #core-features -->
+                <button onclick="window.location.href='#core-features'" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Section -->
+    <section id="core-features">
+        <div class="container">
+            <h2 class="reveal">核心亮點，讓記帳變有趣！</h2>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <i class="fas fa-brain icon"></i>
+                    <h3>頂尖 AI 驅動</h3>
+                    <p>接入 Google Gemini，不只是指令接收器，而是會像朋友一樣理解你的自然語言，精準解析記帳方式。</p>
+                    <span class="example">例：「今天午餐雞排 120」 → 自動歸類為餐飲支出 <i class="fas fa-arrow-right"></i></span>
+                    <!-- 頂尖 AI 驅動圖片 -->
+                    <img class="card-image" alt="卡通浣熊正在擔憂或思考金錢問題，暗示AI記帳能解決這些煩惱。" src="image/Accounting-Raccoon-Worry.png">
+                </div>
+                <div class="feature-card reveal">
+                    <i class="fas fa-comment-dots icon"></i>
+                    <h3>聰明又可愛的角色互動</h3>
+                    <p>非記帳訊息由具「浣熊性格」的 AI 回覆，偶爾調皮、偶爾貼心，陪你聊聊生活與金錢哲學。</p>
+                    <!-- 聰明又可愛的角色互動圖片 -->
+                    <img class="card-image" alt="可愛的卡通浣熊AI在LINE對話中與用戶互動，展現調皮或貼心的回答。" src="image/Accounting-Raccoon-lineline.png">
+                </div>
+                <div class="feature-card reveal">
+                    <i class="fab fa-line icon"></i>
+                    <h3>LINE 原生體驗</h3>
+                    <p>告別複雜 App，無需下載，只需在 LINE 對話，就能記帳、查帳、互動。輕量、快速、直覺！</p>
+                    <!-- LINE 原生體驗圖片 -->
+                    <img class="card-image" alt="卡通浣熊在LINE對話界面中輕鬆記帳的場景。" src="image/Accounting-Raccoon-useline.png">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Overview Section -->
+    <section id="features-overview">
+        <div class="container">
+            <h2 class="reveal">豐富功能，輕鬆掌握！</h2>
+            <div class="function-list">
+                <div class="function-item reveal">
+                    <i class="fas fa-money-bill-wave" style="color:#dc143c;"></i>
+                    <div class="content">
+                        <h4>快速記帳 (支出)</h4>
+                        <p>輕鬆記錄日常開銷。</p>
+                        <span class="example">範例：「昨天中午吃了雞排 120」</span>
+                    </div>
+                </div>
+                <div class="function-item reveal">
+                    <i class="fas fa-hand-holding-usd" style="color:#32cd32;"></i>
+                    <div class="content">
+                        <h4>記錄收入 (進帳)</h4>
+                        <p>清楚記錄每一筆收入。</p>
+                        <span class="example">範例：「收入薪水 30000」</span>
+                    </div>
+                </div>
+                <div class="function-item reveal">
+                    <i class="fas fa-search-dollar" style="color:#1e90ff;"></i>
+                    <div class="content">
+                        <h4>即時查帳</h4>
+                        <p>隨時掌握總收入、總支出、餘額。</p>
+                        <span class="example">範例：「查帳」</span>
+                    </div>
+                </div>
+                <div class="function-item reveal">
+                    <i class="fas fa-trash-alt" style="color:#808080;"></i>
+                    <div class="content">
+                        <h4>刪除錯誤記錄</h4>
+                        <p>輕鬆移除最近一筆錯誤記錄。</p>
+                        <span class="example">範例：「刪除」</span>
+                    </div>
+                </div>
+                <div class="function-item reveal">
+                    <i class="fas fa-question-circle" style="color:#ffd700;"></i>
+                    <div class="content">
+                        <h4>查看指令</h4>
+                        <p>顯示所有可用指令與說明。</p>
+                        <span class="example">範例：「幫助」</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="raccoon-smart-tips reveal">
+                <h3><i class="fas fa-lightbulb" style="color: var(--accent-color-2);"></i> 浣熊的小聰明</h3>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> 看到「早餐」、「午餐」、「晚餐」等字眼，會自動歸類為「餐飲」 <i class="fas fa-utensils"></i>。</li>
+                    <li><i class="fas fa-check-circle"></i> 若輸入模糊語句 (如「昨天加油 500」)，也能自動識別日期與分類。</li>
+                    <li><i class="fas fa-check-circle"></i> 能學習你的使用習慣，越記越懂你 <i class="fas fa-brain"></i>。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section id="why-choose-us">
+        <div class="container">
+            <h2 class="reveal">為什麼選擇記帳小浣熊？</h2>
+            <div class="choose-grid">
+                <div class="choose-card reveal">
+                    <i class="fas fa-cogs icon"></i>
+                    <h3>智慧化</h3>
+                    <p>Gemini AI 解析自然語言，快速分類，讓記帳更聰明。</p>
+                </div>
+                <div class="choose-card reveal">
+                    <i class="fas fa-mobile-alt icon"></i>
+                    <h3>便利性</h3>
+                    <p>LINE 原生操作，隨手記帳不費力，隨時隨地輕鬆管理財務。</p>
+                </div>
+                <div class="choose-card reveal">
+                    <i class="fas fa-grin-beam icon"></i>
+                    <h3>趣味性</h3>
+                    <p>可愛浣熊互動，讓記帳不再枯燥，而是充滿樂趣的對話。</p>
+                </div>
+            </div>
+            <p class="reveal" style="margin-top: 50px; font-size: 1.2rem; color: var(--dark-bg);">記帳小浣熊，讓理財變得更自然、更有趣。不只是幫你算錢，更幫你理解「錢」這件事。 <i class="fas fa-lightbulb"></i></p>
+        </div>
+    </section>
+
+    <!-- Join Us Section -->
+    <section id="join-us">
+        <div class="container">
+            <h2 class="reveal">立即加入，開啟你的智慧理財之旅！</h2>
+            <div class="qr-code-section reveal">
+                <p>掃描下方 QR Code 或搜尋 LINE ID 即可加入「記帳小浣熊」。</p>
+                <!-- QR Code 圖片 -->
+                <img alt="記帳小浣熊的LINE官方帳號QR碼，邀請用戶掃描加入。" src="image/Accounting-Raccoon-QRcode.png">
+                <p class="line-id"><i class="fab fa-line"></i> LINE ID: @575rjlmq</p>
+                <button class="btn btn-copy-line-id" id="copyLineIdBtn">
+                    <i class="far fa-copy"></i> 複製 LINE ID <span>@575rjlmq</span>
+                </button>
+                <p class="copy-success-message" id="copySuccessMessage">已複製！</p>
+            </div>
+
+            <div class="join-steps">
+                <div class="join-step-card reveal">
+                    <h3><i class="fas fa-user-plus"></i> 1. 加入 LINE 機器人</h3>
+                    <p>搜尋 LINE ID 或掃描 QR Code 輕鬆加入。</p>
+                    <!-- 加入 LINE 機器人步驟圖片 -->
+                    <img class="card-image" alt="卡通浣熊展示如何掃描QR碼加入LINE機器人。" src="image/Accounting-Raccoon-scan.png">
+                </div>
+                <div class="join-step-card reveal">
+                    <h3><i class="fas fa-pen-to-square"></i> 2. 開始記帳！</h3>
+                    <ul>
+                        <li><i class="fas fa-pizza-slice"></i> 支出範例: 午餐 120</li>
+                        <li><i class="fas fa-money-bill-alt"></i> 收入範例: 收入 薪水 30000</li>
+                        <li><i class="fas fa-chart-pie"></i> 查詢餘額: 查帳</li>
+                        <li><i class="fas fa-eraser"></i> 刪除錯誤: 刪除</li>
+                    </ul>
+                    <!-- 開始記帳步驟圖片 -->
+                    <img class="card-image" alt="卡通浣熊展示在LINE中輸入記帳指令的場景。" src="image/Accounting-Raccoon-write.png">
+                </div>
+                <div class="join-step-card reveal">
+                    <h3><i class="fas fa-comments"></i> 3. 享受智慧互動</h3>
+                    <p>不只記帳，還能和小浣熊聊聊日常、問理財問題或放空一下。</p>
+                    <!-- 享受智慧互動步驟圖片 -->
+                    <img class="card-image" alt="卡通浣熊與使用者在LINE對話，展示AI進行有趣的對話、回答理財問題或簡單閒聊的場景。" src="image/Accounting-Raccoon-Work.png">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="developer-info">記帳小浣熊(Accountant Raccoon)開發人員：新北市立雙溪高級中學－黃瀚葳、吳鴻斌、陳冠澤</p>
+            <p>Copyright <i class="fas fa-copyright"></i> Liyuchiutiger Gongminshen</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#hero" class="back-to-top" id="backToTopBtn">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                const navLinks = document.getElementById('navLinks');
+                const menuToggle = document.querySelector('.menu-toggle');
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+
+                    // Close mobile menu if open after clicking a link
+                    if (navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                        document.body.style.overflowY = ''; // 恢復滾動
+                    }
+                } else {
+                    console.error('Target element not found:', targetId);
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { // 當滾動超過 50px 時
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Back to Top Button visibility
+            const backToTopBtn = document.getElementById('backToTopBtn');
+            if (window.scrollY > 300) { // 當滾動超過 300px 時顯示按鈕
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        // Hamburger Menu Toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuToggle.classList.toggle('active'); // 變換漢堡圖標為叉叉
+            // 防止背景滾動
+            if (navLinks.classList.contains('active')) {
+                document.body.style.overflowY = 'hidden';
+            } else {
+                document.body.style.overflowY = '';
+            }
+        });
+
+        // Copy LINE ID functionality
+        const copyLineIdBtn = document.getElementById('copyLineIdBtn');
+        const copySuccessMessage = document.getElementById('copySuccessMessage');
+        const lineIdToCopy = '@575rjlmq'; // 確保這是你要複製的 LINE ID
+
+        if (copyLineIdBtn) {
+            copyLineIdBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(lineIdToCopy);
+                    copySuccessMessage.classList.add('show');
+                    setTimeout(() => {
+                        copySuccessMessage.classList.remove('show');
+                    }, 2000); // 2 秒後隱藏提示
+                } catch (err) {
+                    console.error('Failed to copy LINE ID: ', err);
+                    alert('複製失敗，請手動複製 LINE ID: ' + lineIdToCopy);
+                }
+            });
+        }
+
+        // Scroll Reveal Animation (Intersection Observer)
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealElements = document.querySelectorAll('.reveal');
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('reveal-active');
+                        observer.unobserve(entry.target); // 一旦動畫觸發，就不再觀察
+                    }
+                });
+            }, {
+                threshold: 0.1, // 當元素 10% 進入視口時觸發
+                rootMargin: '0px 0px -50px 0px' // 在底部增加一個 50px 的提前量
+            });
+
+            revealElements.forEach(element => {
+                // 檢查是否為 .hero-image 或 .btn-group
+                // 這兩個元素在 CSS 中已有初始動畫，不應被 .reveal 的初始 opacity: 0 覆蓋
+                // 因此，我們在 DOMContentLoaded 後，直接給它們添加 reveal-active，讓它們按照 CSS 的 delay 立即執行
+                if (element.classList.contains('hero-image') || element.classList.contains('btn-group')) {
+                    element.classList.add('reveal-active');
+                    // 由於它們已經通過 CSS 動畫顯示，我們不需要 IntersectionObserver 來處理它們
+                } else {
+                    observer.observe(element);
+                }
+            });
+        });
+
+        // Replace <a> with <button> for hero buttons for better semantic and clickability
+        document.querySelector('#hero .btn-group a:first-child').outerHTML = '<button onclick="window.location.href=\'#join-us\'" class="btn"><i class="fab fa-line"></i> 立即體驗</button>';
+        document.querySelector('#hero .btn-group a:last-child').outerHTML = '<button onclick="window.location.href=\'#core-features\'" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></button>';
+    </script>
+</body>
+</html>
