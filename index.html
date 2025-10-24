@@ -222,20 +222,26 @@
             background: var(--primary-color);
         }
         
+        /* 複製 LINE ID 按鈕的新樣式：無背景、無邊框、無陰影，僅圖標 */
         .btn-copy-line-id {
-            background: var(--accent-color-1);
-            padding: 12px 25px; /* 稍微小一點 */
-            font-size: 1rem;
-            margin-top: 15px;
+            background: transparent; /* 無背景 */
+            border: none; /* 無邊框 */
+            box-shadow: none; /* 無陰影 */
+            color: var(--accent-color-1); /* 使用 LINE 綠作為圖標顏色 */
+            font-size: 1rem; /* 讓圖標大小與 LINE ID 文字相符 */
+            cursor: pointer;
+            padding: 1; /* 無內部邊距 */
+            margin-left: 10px; /* 與 LINE ID 文字保持距離 */
+            vertical-align: middle; /* 垂直居中對齊文字 */
+            transition: color var(--transition-speed), transform var(--transition-speed); /* 僅過渡顏色和形變 */
         }
         .btn-copy-line-id:hover {
-            background: var(--primary-color);
-            transform: translateY(-3px) scale(1.01);
-            box-shadow: var(--shadow-light);
+            background: transparent; /* 懸停時也確保無背景 */
+            color: var(--primary-color); /* 懸停時改變顏色 */
+            transform: scale(1.1); /* 懸停時輕微放大 */
+            box-shadow: none; /* 懸停時也確保無陰影 */
         }
-        .btn-copy-line-id span {
-            margin-left: 10px;
-        }
+
         /* 複製成功提示 */
         .copy-success-message {
             margin-top: 10px;
@@ -243,14 +249,16 @@
             color: var(--accent-color-1);
             opacity: 0;
             transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            height: 0; /* 初始高度為0，不佔空間 */
+            /* 修正：使用 max-height 實現平滑的顯示/隱藏，同時確保初始不可見 */
+            transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease-out;
+            max-height: 0; /* 初始最大高度為0，不佔空間 */
             overflow: hidden; /* 隱藏溢出內容 */
+            line-height: 1; /* 調整行高，避免佔用多餘空間 */
         }
         .copy-success-message.show {
             opacity: 1;
             transform: translateY(0);
-            height: auto; /* 顯示時恢復高度 */
+            max-height: 50px; /* 顯示時給予一個足夠的高度 */
         }
 
         /* Hero Section - Rewritten */
@@ -407,6 +415,13 @@
         .function-list .function-item:nth-child(3) { transition-delay: 0.1s; }
         .function-list .function-item:nth-child(4) { transition-delay: 0.15s; }
         .function-list .function-item:nth-child(5) { transition-delay: 0.2s; }
+        /* Add delay for the new function item */
+        .raccoon-smart-tips.reveal.delay-5 { transition-delay: 0.25s; }
+        .raccoon-smart-tips ul li:nth-child(1) i { animation-delay: 0.1s; }
+        .raccoon-smart-tips ul li:nth-child(2) i { animation-delay: 0.3s; }
+        .raccoon-smart-tips ul li:nth-child(3) i { animation-delay: 0.5s; }
+        .raccoon-smart-tips ul li:nth-child(4) i { animation-delay: 0.7s; } /* New delay for new list item */
+
 
         .choose-grid .choose-card:nth-child(1) { transition-delay: 0s; }
         .choose-grid .choose-card:nth-child(2) { transition-delay: 0.15s; }
@@ -570,9 +585,12 @@
             animation: bounceIn 0.8s ease-out forwards; /* 列表項圖標動畫 */
             opacity: 0;
         }
+        /* Adjusted animation delays for existing items */
         .raccoon-smart-tips ul li:nth-child(1) i { animation-delay: 0.1s; }
         .raccoon-smart-tips ul li:nth-child(2) i { animation-delay: 0.3s; }
         .raccoon-smart-tips ul li:nth-child(3) i { animation-delay: 0.5s; }
+        .raccoon-smart-tips ul li:nth-child(4) i { animation-delay: 0.7s; } /* New delay for the new list item */
+
 
         @keyframes bounceIn {
             0% { opacity: 0; transform: scale(0.3); }
@@ -665,7 +683,7 @@
         .qr-code-section img {
             max-width: 200px;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* 增加圖片下方間距 */
             /* border-radius: 5px; <-- REMOVED */
             /* box-shadow: var(--shadow-light); <-- REMOVED */
         }
@@ -673,10 +691,10 @@
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--accent-color-1);
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-top: 15px; /* 調整與上方按鈕的間距 */
+            display: flex; /* 使用 flex 讓文字和按鈕在同一行 */
+            align-items: center; /* 垂直居中 */
+            justify-content: center; /* 水平居中 */
         }
         .qr-code-section .line-id i {
             margin-right: 10px;
@@ -981,9 +999,9 @@
             .qr-code-section .line-id {
                 font-size: 1.2rem;
             }
-            .btn-copy-line-id {
-                padding: 10px 20px;
-                font-size: 0.95rem;
+            /* 在手機版也保持複製按鈕簡潔 */
+            .btn-copy-line-id { 
+                font-size: 1.2rem; /* 確保圖標在小尺寸下足夠大 */
             }
 
             .join-step-card h3 i {
@@ -1102,10 +1120,10 @@
                 <h1 class="reveal">記帳小浣熊，<br>告別枯燥數字，<br>迎接聰明理財，<br>打造創新生活！</h1>
                 <h2 class="reveal">最聰明的AI記帳夥伴，<br>徹底改變你的理財體驗！</h2>
                 <div class="btn-group reveal">
-                    <!-- 立即體驗按鈕跳轉至 #join-us -->
-                    <button onclick="window.location.href='#join-us'" class="btn"><i class="fab fa-line"></i> 立即體驗</button>
+                    <!-- 立即體驗按鈕直接跳轉至 LINE 加好友 -->
+                    <a href="https://line.me/R/ti/p/@575rjlmq" target="_blank" rel="noopener noreferrer" class="btn"><i class="fab fa-line"></i> 立即體驗</a>
                     <!-- 了解更多按鈕跳轉至 #core-features -->
-                    <button onclick="window.location.href='#core-features'" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></button>
+                    <a href="#core-features" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></a>
                 </div>
             </div>
             <div class="hero-image-wrapper">
@@ -1123,15 +1141,15 @@
                 <div class="feature-card reveal">
                     <i class="fas fa-brain icon"></i>
                     <h3>頂尖 AI 驅動</h3>
-                    <p>接入 Google Gemini，不只是指令接收器，而是會像朋友一樣理解你的自然語言，精準解析記帳方式。</p>
-                    <span class="example">例：「今天午餐雞排 120」 → 自動歸類為餐飲支出 <i class="fas fa-arrow-right"></i></span>
+                    <p>接入 Google Gemini，不只精準解析單筆開銷，更能理解複雜指令、支援多筆記帳，讓AI真正成為你的理財顧問！</p>
+                    <span class="example">例：「今天午餐雞排120，晚餐200」 → 自動分拆記錄為兩筆餐飲支出！ <i class="fas fa-arrow-right"></i></span>
                     <!-- 頂尖 AI 驅動圖片 -->
                     <img class="card-image" alt="卡通浣熊正在擔憂或思考金錢問題，暗示AI記帳能解決這些煩惱。" src="image/Accounting-Raccoon-Worry.png">
                 </div>
                 <div class="feature-card reveal delay-1">
                     <i class="fas fa-comment-dots icon"></i>
                     <h3>聰明又可愛的角色互動</h3>
-                    <p>非記帳訊息由具「浣熊性格」的 AI 回覆，偶爾調皮、偶爾貼心，陪你聊聊生活與金錢哲學。</p>
+                    <p>AI 對話能力大幅提升！非記帳訊息由具「浣熊性格」的 AI 回覆，詞彙庫更豐富，互動更有趣，陪你聊聊生活與金錢哲學，或提供即時理財小建議。</p>
                     <!-- 聰明又可愛的角色互動圖片 -->
                     <img class="card-image" alt="可愛的卡通浣熊AI在LINE對話中與用戶互動，展現調皮或貼心的回答。" src="image/Accounting-Raccoon-lineline.png">
                 </div>
@@ -1155,24 +1173,24 @@
                     <i class="fas fa-money-bill-wave" style="color:#dc143c;"></i>
                     <div class="content">
                         <h4>快速記帳 (支出)</h4>
-                        <p>輕鬆記錄日常開銷。</p>
-                        <span class="example">範例：「昨天中午吃了雞排 120」</span>
+                        <p>輕鬆記錄日常開銷，支援「多筆」同時輸入！</p>
+                        <span class="example">範例：「昨天午餐雞排120，晚餐牛排250」</span>
                     </div>
                 </div>
                 <div class="function-item reveal delay-1">
                     <i class="fas fa-hand-holding-usd" style="color:#32cd32;"></i>
                     <div class="content">
                         <h4>記錄收入 (進帳)</h4>
-                        <p>清楚記錄每一筆收入。</p>
-                        <span class="example">範例：「收入薪水 30000」</span>
+                        <p>清楚記錄每一筆收入，也支援多筆。</p>
+                        <span class="example">範例：「收入薪水30000、兼職5000」</span>
                     </div>
                 </div>
                 <div class="function-item reveal delay-2">
                     <i class="fas fa-search-dollar" style="color:#1e90ff;"></i>
                     <div class="content">
-                        <h4>即時查帳</h4>
-                        <p>隨時掌握總收入、總支出、餘額。</p>
-                        <span class="example">範例：「查帳」</span>
+                        <h4>即時查帳 (AI強化)</h4>
+                        <p>隨時掌握總收入、總支出、餘額，新增「時間範圍」查詢。</p>
+                        <span class="example">範例：「查帳這禮拜的餐飲」、「查詢這個月」</span>
                     </div>
                 </div>
                 <div class="function-item reveal delay-3">
@@ -1199,6 +1217,7 @@
                     <li><i class="fas fa-check-circle"></i> 看到「早餐」、「午餐」、「晚餐」等字眼，會自動歸類為「餐飲」 <i class="fas fa-utensils"></i>。</li>
                     <li><i class="fas fa-check-circle"></i> 若輸入模糊語句 (如「昨天加油 500」)，也能自動識別日期與分類。</li>
                     <li><i class="fas fa-check-circle"></i> 能學習你的使用習慣，越記越懂你 <i class="fas fa-brain"></i>。</li>
+                    <li><i class="fas fa-check-circle"></i> 所有記錄都包含「時分秒」，搭配查詢功能讓報表更精準 <i class="fas fa-clock"></i>。</li>
                 </ul>
             </div>
         </div>
@@ -1212,7 +1231,7 @@
                 <div class="choose-card reveal">
                     <i class="fas fa-cogs icon"></i>
                     <h3>智慧化</h3>
-                    <p>Gemini AI 解析自然語言，快速分類，讓記帳更聰明。</p>
+                    <p>Gemini AI 大幅強化自然語言解析能力，支援多筆記帳與時間區間查詢，讓記帳和查帳都更智慧、更直覺。</p>
                 </div>
                 <div class="choose-card reveal delay-1">
                     <i class="fas fa-mobile-alt icon"></i>
@@ -1222,7 +1241,7 @@
                 <div class="choose-card reveal delay-2">
                     <i class="fas fa-grin-beam icon"></i>
                     <h3>趣味性</h3>
-                    <p>可愛浣熊互動，讓記帳不再枯燥，而是充滿樂趣的對話。</p>
+                    <p>可愛浣熊互動進化，詞彙更豐富、回應更多樣，讓記帳不再枯燥，而是充滿樂趣的對話與陪伴。</p>
                 </div>
             </div>
             <p class="reveal delay-3" style="margin-top: 50px; font-size: 1.2rem; color: var(--dark-bg);">記帳小浣熊，讓理財變得更自然、更有趣。不只是幫你算錢，更幫你理解「錢」這件事。 <i class="fas fa-lightbulb"></i></p>
@@ -1234,29 +1253,39 @@
         <div class="container">
             <h2 class="reveal">立即加入，<br>開啟你的智慧理財之旅！</h2>
             <div class="qr-code-section reveal">
-                <p>掃描下方 QR Code 或搜尋 LINE ID 即可加入「記帳小浣熊」。</p>
+                <p>掃描下方 QR Code 或點擊按鈕，即可立即加入「記帳小浣熊」！</p>
                 <!-- QR Code 圖片 -->
                 <img alt="記帳小浣熊的LINE官方帳號QR碼，邀請用戶掃描加入。" src="image/Accounting-Raccoon-QRcode.png">
-                <p class="line-id"><i class="fab fa-line"></i> LINE ID: @575rjlmq</p>
-                <button class="btn btn-copy-line-id" id="copyLineIdBtn">
-                    <i class="far fa-copy"></i> 複製 LINE ID <span>@575rjlmq</span>
-                </button>
+                
+                <!-- 立即加入 LINE 按鈕 (移到 QR Code 下方並置中) -->
+                <a href="https://line.me/R/ti/p/@575rjlmq" target="_blank" rel="noopener noreferrer" class="btn" 
+                   style="background: var(--accent-color-1); margin-top: 20px; margin-bottom: 20px; display: block; max-width: 300px; margin-left: auto; margin-right: auto;">
+                    <i class="fab fa-line"></i> 立即加入 LINE
+                </a>
+
+                <!-- LINE ID 和 複製按鈕 (複製按鈕簡化並移到文字右側) -->
+                <p class="line-id">
+                    <i class="fab fa-line"></i> LINE ID: @575rjlmq 
+                    <button type="button" class="btn btn-copy-line-id" id="copyLineIdBtn">
+                        <i class="far fa-copy"></i>
+                    </button>
+                </p>
                 <p class="copy-success-message" id="copySuccessMessage">已複製！</p>
             </div>
 
             <div class="join-steps">
                 <div class="join-step-card reveal">
                     <h3><i class="fas fa-user-plus"></i> 1. 加入 LINE 機器人</h3>
-                    <p>搜尋 LINE ID 或掃描 QR Code 輕鬆加入。</p>
+                    <p>點擊上方按鈕、搜尋 LINE ID 或掃描 QR Code 輕鬆加入。</p>
                     <!-- 加入 LINE 機器人步驟圖片 -->
                     <img class="card-image" alt="卡通浣熊展示如何掃描QR碼加入LINE機器人。" src="image/Accounting-Raccoon-scan.png">
                 </div>
                 <div class="join-step-card reveal delay-1">
                     <h3><i class="fas fa-pen-to-square"></i> 2. 開始記帳！</h3>
                     <ul>
-                        <li><i class="fas fa-pizza-slice"></i> 支出範例: 午餐 120</li>
+                        <li><i class="fas fa-pizza-slice"></i> 支出範例: 午餐 120、晚餐 200</li>
                         <li><i class="fas fa-money-bill-alt"></i> 收入範例: 收入 薪水 30000</li>
-                        <li><i class="fas fa-chart-pie"></i> 查詢餘額: 查帳</li>
+                        <li><i class="fas fa-chart-pie"></i> 查詢餘額: 查帳這禮拜</li>
                         <li><i class="fas fa-eraser"></i> 刪除錯誤: 刪除</li>
                     </ul>
                     <!-- 開始記帳步驟圖片 -->
@@ -1264,7 +1293,7 @@
                 </div>
                 <div class="join-step-card reveal delay-2">
                     <h3><i class="fas fa-comments"></i> 3. 享受智慧互動</h3>
-                    <p>不只記帳，還能和小浣熊聊聊日常、問理財問題或放空一下。</p>
+                    <p>不只記帳，還能和小浣熊聊聊日常、問理財問題或放空一下，享受更生動的AI陪伴。</p>
                     <!-- 享受智慧互動步驟圖片 -->
                     <img class="card-image" alt="卡通浣熊與使用者在LINE對話，展示AI進行有趣的對話、回答理財問題或簡單閒聊的場景。" src="image/Accounting-Raccoon-Work.png">
                 </div>
@@ -1290,26 +1319,29 @@
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                e.preventDefault();
+                // Only prevent default for internal anchor links, not external LINE links
+                if (this.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
 
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                const navLinks = document.getElementById('navLinks');
-                const menuToggle = document.querySelector('.menu-toggle');
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    const navLinks = document.getElementById('navLinks');
+                    const menuToggle = document.querySelector('.menu-toggle');
 
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
 
-                    // Close mobile menu if open after clicking a link
-                    if (navLinks.classList.contains('active')) {
-                        navLinks.classList.remove('active');
-                        menuToggle.classList.remove('active');
-                        document.body.style.overflowY = ''; // 恢復滾動
+                        // Close mobile menu if open after clicking a link
+                        if (navLinks.classList.contains('active')) {
+                            navLinks.classList.remove('active');
+                            menuToggle.classList.remove('active');
+                            document.body.style.overflowY = ''; // 恢復滾動
+                        }
+                    } else {
+                        console.error('Target element not found:', targetId);
                     }
-                } else {
-                    console.error('Target element not found:', targetId);
                 }
             });
         });
@@ -1359,7 +1391,7 @@
                     copySuccessMessage.classList.add('show');
                     setTimeout(() => {
                         copySuccessMessage.classList.remove('show');
-                    }, 2000); // 2 秒後隱藏提示
+                    }, 1000); // 1 秒後隱藏提示
                 } catch (err) {
                     console.error('Failed to copy LINE ID: ', err);
                     alert('複製失敗，請手動複製 LINE ID: ' + lineIdToCopy);
