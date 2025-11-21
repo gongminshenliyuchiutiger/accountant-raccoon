@@ -1,1437 +1,1207 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>記帳小浣熊 - LINE 上最聰明的 AI 記帳夥伴</title>
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts (Optional, for better typography) -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <title>Classroom Screen - 終極優化版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #6a5acd; /* 深紫羅蘭 */
-            --secondary-color: #ff6347; /* 番茄紅 */
-            --accent-color-1: #00b900; /* LINE 綠 */
-            --accent-color-2: #ffa500; /* 橘 */
-            --accent-color-3: #ff69b4; /* 粉紅 */
-            --text-color: #333;
-            --light-bg: #f8f8f8;
-            --dark-bg: #2c3e50;
-            --gradient-1: linear-gradient(135deg, #6a5acd, #a77ffc); /* 主漸層 */
-            --gradient-2: linear-gradient(135deg, #ff6347, #ff8c00); /* 副漸層 */
-            --gradient-3: linear-gradient(135deg, #00b900, #32cd32); /* 綠漸層 */
-
-            /* 新增一些變數用於陰影和動畫 */
-            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
-            --shadow-heavy: 0 12px 35px rgba(0, 0, 0, 0.2);
-            --transition-speed: 0.3s ease-in-out;
+            --primary-color: #4a90e2;
+            --accent-color: #ff5f57;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --shadow-lg: 0 15px 35px rgba(0,0,0,0.15);
+            --shadow-sm: 0 5px 15px rgba(0,0,0,0.08);
+            --text-main: #2c3e50;
+            --radius-lg: 16px;
+            --radius-sm: 8px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body {
-            font-family: 'Noto Sans TC', 'Montserrat', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: #fff;
-            scroll-behavior: smooth;
-        }
-
-        /* 提升選取文本的視覺效果 */
-        ::selection {
-            background: var(--primary-color);
-            color: #fff;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: rgba(255, 255, 255, 0.98); /* 稍微不透明 */
-            padding: 15px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow-light);
-            transition: all var(--transition-speed);
-        }
-
-        /* 滾動後的 Navbar 樣式 */
-        .navbar.scrolled {
-            background: rgba(255, 255, 255, 0.9); /* 滾動後更透明 */
-            box-shadow: var(--shadow-medium);
-            padding: 10px 0; /* 滾動後縮小 */
-        }
-
-        .navbar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color var(--transition-speed);
-        }
-        .navbar .logo:hover {
-            color: var(--secondary-color);
-        }
-
-        .navbar .nav-links {
-            list-style: none;
-            display: flex;
-        }
-
-        .navbar .nav-links li {
-            margin-left: 30px;
-        }
-
-        .navbar .nav-links a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 400;
-            transition: color var(--transition-speed), transform var(--transition-speed);
-            position: relative;
-            padding-bottom: 5px; /* 為下劃線預留空間 */
-        }
-
-        .navbar .nav-links a::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-            transition: width var(--transition-speed);
-        }
-
-        .navbar .nav-links a:hover {
-            color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        .navbar .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* Hamburger Menu (Desktop - Hidden) */
-        .menu-toggle {
-            display: none;
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            z-index: 1001; /* 確保在導航連結之上 */
-        }
-
-        /* Sections */
-        section {
-            padding: 80px 0;
-            text-align: center;
-            scroll-margin-top: 80px; /* 根據 navbar 高度調整 */
-            position: relative; /* 確保內容位於滾動顯示之上 */
-        }
-
-        section:nth-of-type(even) {
-            background-color: var(--light-bg);
-        }
-
-        h1, h2, h3 {
-            margin-bottom: 20px;
-            font-weight: 700;
-            color: var(--dark-bg);
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            line-height: 1.2;
-        }
-
-        h2 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-top: 40px;
-        }
-
-        h3 {
-            font-size: 1.8rem;
-            color: var(--secondary-color);
-            margin-top: 30px;
-        }
-
-        p {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .btn {
-            display: inline-block;
-            background: var(--primary-color);
-            color: #fff;
-            padding: 15px 30px;
-            margin: 20px 10px 0;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 700;
-            transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
-            box-shadow: var(--shadow-light);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden; /* 確保hover效果不溢出 */
-            border: none; /* 讓button看起來更像連結 */
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: left var(--transition-speed);
-            transform: skewX(-20deg); /* 斜角效果 */
-        }
-
-        .btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-5px) scale(1.02); /* 向上浮動並輕微放大 */
-            box-shadow: var(--shadow-medium);
-        }
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-secondary {
-            background: var(--accent-color-2);
-        }
-        .btn-secondary:hover {
-            background: var(--primary-color);
-        }
-        
-        /* 複製 LINE ID 按鈕的新樣式：無背景、無邊框、無陰影，僅圖標 */
-        .btn-copy-line-id {
-            background: transparent; /* 無背景 */
-            border: none; /* 無邊框 */
-            box-shadow: none; /* 無陰影 */
-            color: var(--accent-color-1); /* 使用 LINE 綠作為圖標顏色 */
-            font-size: 1rem; /* 讓圖標大小與 LINE ID 文字相符 */
-            cursor: pointer;
-            padding: 1; /* 無內部邊距 */
-            margin-left: 10px; /* 與 LINE ID 文字保持距離 */
-            vertical-align: middle; /* 垂直居中對齊文字 */
-            transition: color var(--transition-speed), transform var(--transition-speed); /* 僅過渡顏色和形變 */
-        }
-        .btn-copy-line-id:hover {
-            background: transparent; /* 懸停時也確保無背景 */
-            color: var(--primary-color); /* 懸停時改變顏色 */
-            transform: scale(1.1); /* 懸停時輕微放大 */
-            box-shadow: none; /* 懸停時也確保無陰影 */
-        }
-
-        /* 複製成功提示 */
-        .copy-success-message {
-            margin-top: 10px;
-            font-size: 0.95rem;
-            color: var(--accent-color-1);
-            opacity: 0;
-            transform: translateY(10px);
-            /* 修正：使用 max-height 實現平滑的顯示/隱藏，同時確保初始不可見 */
-            transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease-out;
-            max-height: 0; /* 初始最大高度為0，不佔空間 */
-            overflow: hidden; /* 隱藏溢出內容 */
-            line-height: 1; /* 調整行高，避免佔用多餘空間 */
-        }
-        .copy-success-message.show {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 50px; /* 顯示時給予一個足夠的高度 */
-        }
-
-        /* Hero Section - Rewritten */
-        #hero {
-            background: var(--gradient-1);
-            color: #fff;
-            padding: 100px 20px;
-            display: flex; /* 使用 flex 來居中 .hero-content-wrapper */
-            justify-content: center;
-            align-items: center;
-            min-height: 85vh; /* 增加最小高度 */
-            position: relative;
+            font-family: 'Noto Sans TC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('background/background001.png') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #eef2f5;
+            height: 100vh;
             overflow: hidden;
-            text-align: left; /* 內容預設左對齊 */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            position: relative;
+            transition: background-image 0.5s ease, background-color 0.5s ease;
         }
 
-        #hero::before, #hero::after { /* 增加一個背景層次 */
-            content: '';
+        /* --- 工作區域 --- */
+        #workspace {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-size: 150px 150px; /* 調整圖案大小 */
-            opacity: 0.2;
-            pointer-events: none; /* 讓其不阻擋鼠標事件 */
-        }
-        #hero::before {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23ffffff" fill-opacity="0.1"/></svg>') repeat;
-            animation: moveBackground 40s linear infinite;
-        }
-        #hero::after { /* 第二層背景，不同圖案和動畫 */
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 0L61.8 35.3H98.8L69.1 57.7L80.9 93L50 70.7L19.1 93L30.9 57.7L1.2 35.3H38.2L50 0Z" fill="%23ffffff" fill-opacity="0.08"/></svg>') repeat;
-            animation: moveBackgroundReverse 50s linear infinite;
-            transform-origin: center center; /* 確保旋轉中心正確 */
+            z-index: 1;
+            pointer-events: none;
         }
 
-        @keyframes moveBackground {
-            from { transform: translate(0, 0); }
-            to { transform: translate(150px, 150px); } /* 移動距離加大 */
-        }
-        @keyframes moveBackgroundReverse { /* 反向移動動畫 */
-            from { transform: translate(0, 0) rotate(0deg); }
-            to { transform: translate(-150px, -150px) rotate(360deg); }
-        }
-
-        /* New Hero content wrapper for desktop split layout */
-        .hero-content-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; /* 允許換行，為響應式做準備 */
-            max-width: 1000px; /* 限制內部內容的最大寬度 */
-            width: 100%;
-            gap: 40px; /* 文字區塊與圖片之間的間距 */
-            z-index: 10; /* 確保在背景動畫之上 */
-        }
-
-        .hero-text-content {
-            flex: 1; /* 佔用可用空間 */
-            min-width: 350px; /* 確保文字區塊在縮小時不會太窄 */
-        }
-
-        .hero-image-wrapper {
-            flex: 1; /* 佔用可用空間 */
-            min-width: 300px; /* 確保圖片區塊在縮小時不會太窄 */
-            display: flex;
-            justify-content: center; /* 在圖片區塊內居中圖片 */
-            align-items: center;
-            padding-left: 20px; /* 避免圖片太靠近左側文字 */
-        }
-
-        #hero h1 {
-            color: #fff;
-            margin-bottom: 15px;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 增加文字陰影 */
-            font-size: clamp(2.5rem, 5vw, 3.8rem); /* 響應式字體大小 */
-            line-height: 1.2;
-        }
-
-        #hero h2 {
-            color: #fff;
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem); /* 響應式字體大小 */
-            font-weight: 300;
-            margin-bottom: 40px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            line-height: 1.5;
-        }
-
-        /* Removed border-radius and box-shadow for hero image */
-        #hero .hero-image {
-            max-width: 100%; /* 確保圖片在其容器內完全響應 */
-            height: auto;
-            /* border-radius: 8px; <-- REMOVED */
-            /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); <-- REMOVED */
-            transition: transform var(--transition-speed);
-        }
-        #hero .hero-image:hover {
-            transform: translateY(-5px);
-        }
-
-        /* Hero 文本和按鈕動畫 */
-        /* 將動畫類別直接應用到新的文本和圖片容器 */
-        .hero-text-content h1.reveal-active { animation: fadeInTop 1s ease-out 0.5s forwards; }
-        .hero-text-content h2.reveal-active { animation: fadeIn 1.5s ease-out 1s forwards; }
-        .hero-text-content .btn-group.reveal-active { animation: fadeIn 1.5s ease-out 1.5s forwards; }
-        .hero-image-wrapper .hero-image.reveal-active { animation: zoomIn 1.2s ease-out forwards; }
-
-
-        @keyframes fadeInTop {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* General card image style (no borders/shadows) */
-        /* Removed border-radius and box-shadow for all card images */
-        .card-image {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-            /* border-radius: 8px; <-- REMOVED */
-            /* box-shadow: var(--shadow-light); <-- REMOVED */
-        }
-
-        /* --- Scroll Reveal Animation --- */
-        .reveal {
+        /* --- 底部工具列容器 (包含縮小按鈕) --- */
+        .toolbar-wrapper {
             position: relative;
-            opacity: 0;
-            transform: translateY(50px); /* 初始位置在下方 */
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* 動畫效果 */
-            will-change: opacity, transform; /* 提升動畫性能 */
-        }
-
-        .reveal-active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 不同元素的延遲，讓動畫錯開 */
-        .features-grid .feature-card:nth-child(1) { transition-delay: 0s; }
-        .features-grid .feature-card:nth-child(2) { transition-delay: 0.15s; }
-        .features-grid .feature-card:nth-child(3) { transition-delay: 0.3s; }
-
-        .function-list .function-item:nth-child(1) { transition-delay: 0s; }
-        .function-list .function-item:nth-child(2) { transition-delay: 0.05s; }
-        .function-list .function-item:nth-child(3) { transition-delay: 0.1s; }
-        .function-list .function-item:nth-child(4) { transition-delay: 0.15s; }
-        .function-list .function-item:nth-child(5) { transition-delay: 0.2s; }
-        /* Add delay for the new function item */
-        .raccoon-smart-tips.reveal.delay-5 { transition-delay: 0.25s; }
-        .raccoon-smart-tips ul li:nth-child(1) i { animation-delay: 0.1s; }
-        .raccoon-smart-tips ul li:nth-child(2) i { animation-delay: 0.3s; }
-        .raccoon-smart-tips ul li:nth-child(3) i { animation-delay: 0.5s; }
-        .raccoon-smart-tips ul li:nth-child(4) i { animation-delay: 0.7s; } /* New delay for new list item */
-
-
-        .choose-grid .choose-card:nth-child(1) { transition-delay: 0s; }
-        .choose-grid .choose-card:nth-child(2) { transition-delay: 0.15s; }
-        .choose-grid .choose-card:nth-child(3) { transition-delay: 0.3s; }
-
-        .join-steps .join-step-card:nth-child(1) { transition-delay: 0s; }
-        .join-steps .join-step-card:nth-child(2) { transition-delay: 0.15s; }
-        .join-steps .join-step-card:nth-child(3) { transition-delay: 0.3s; }
-
-        /* Core Features */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .feature-card {
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: var(--shadow-light);
-            text-align: left;
-            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .feature-card .icon {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            display: block;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); /* 漸層圖標 */
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .feature-card h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.6rem;
-            color: var(--dark-bg);
-        }
-
-        .feature-card p {
-            font-size: 1rem;
-            color: #555;
-        }
-        .feature-card .example {
-            font-style: italic;
-            font-size: 0.95rem;
-            color: #777;
-            margin-top: 15px;
-            display: block;
-        }
-
-        /* Features Overview */
-        .function-list {
-            list-style: none;
-            margin-top: 50px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            text-align: left;
-        }
-
-        .function-item {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: var(--shadow-light);
+            margin-bottom: 30px;
+            z-index: 100;
             display: flex;
-            align-items: flex-start;
-            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-        }
-        .function-item:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-medium);
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
-        .function-item i {
-            font-size: 2rem;
-            margin-right: 20px;
-            min-width: 40px;
-            text-align: center;
-            line-height: 1; /* 垂直居中 */
+        .toolbar-wrapper.minimized {
+            transform: translateY(120%);
         }
 
-        .function-item .content h4 {
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .function-item .content p {
-            font-size: 0.95rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .function-item .content .example {
-            font-size: 0.9rem;
-            color: #888;
-            font-style: italic;
-        }
-
-        .raccoon-smart-tips {
-            background-color: var(--dark-bg);
-            color: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            margin-top: 60px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-heavy);
-            transform: rotateZ(-1deg); /* 輕微傾斜，增加趣味性 */
-            transition: transform 0.5s ease;
-        }
-        .raccoon-smart-tips:hover {
-            transform: rotateZ(0deg); /* 恢復正常 */
-        }
-        .raccoon-smart-tips::before {
-            content: '';
+        /* 縮小/展開按鈕 */
+        .toggle-bar-btn {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 120px; /* 稍微放大 */
-            height: 120px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 0L61.8 35.3H98.8L69.1 57.7L80.9 93L50 70.7L19.1 93L30.9 57.7L1.2 35.3H38.2L50 0Z" fill="%23ffffff" fill-opacity="0.15"/></svg>') no-repeat center center; /* 圖案更明顯 */
-            background-size: contain;
-            transform: rotate(25deg); /* 旋轉角度更大 */
-            opacity: 0.3; /* 透明度降低 */
-        }
-
-        .raccoon-smart-tips h3 {
-            color: var(--accent-color-2);
-            font-size: 2rem;
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 1;
-        }
-        .raccoon-smart-tips ul {
-            list-style: none;
-            padding-left: 0;
-            position: relative;
-            z-index: 1;
-        }
-        .raccoon-smart-tips ul li {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-        }
-        .raccoon-smart-tips ul li i {
-            margin-right: 15px;
-            color: var(--accent-color-1);
-            font-size: 1.5rem;
-            animation: bounceIn 0.8s ease-out forwards; /* 列表項圖標動畫 */
-            opacity: 0;
-        }
-        /* Adjusted animation delays for existing items */
-        .raccoon-smart-tips ul li:nth-child(1) i { animation-delay: 0.1s; }
-        .raccoon-smart-tips ul li:nth-child(2) i { animation-delay: 0.3s; }
-        .raccoon-smart-tips ul li:nth-child(3) i { animation-delay: 0.5s; }
-        .raccoon-smart-tips ul li:nth-child(4) i { animation-delay: 0.7s; } /* New delay for the new list item */
-
-
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.3); }
-            50% { opacity: 1; transform: scale(1.1); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); }
-        }
-
-        /* Why Choose Us */
-        .choose-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .choose-card {
-            background: var(--light-bg);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: var(--shadow-light);
-            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-        }
-        .choose-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .choose-card .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            display: block;
-            background: linear-gradient(45deg, #00ced1, #9370db); /* 個性化漸層圖標 */
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .choose-card:nth-child(2) .icon { /* 第二張卡片的圖標顏色 */
-            background: linear-gradient(45deg, #9370db, #ff69b4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .choose-card:nth-child(3) .icon { /* 第三張卡片的圖標顏色 */
-            background: linear-gradient(45deg, #ff69b4, var(--accent-color-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .choose-card h3 {
-            margin-top: 0;
-            font-size: 1.8rem;
-            color: var(--dark-bg);
-        }
-
-        .choose-card p {
-            font-size: 1rem;
-            color: #555;
-        }
-
-        /* Join Us */
-        #join-us {
-            background: var(--gradient-2);
-            color: #fff;
-            padding: 80px 20px;
-        }
-        #join-us h2 {
-            color: #fff;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .qr-code-section {
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            max-width: 600px;
-            margin: 50px auto;
-            box-shadow: var(--shadow-heavy);
-            color: var(--text-color);
-            transform: scale(0.95); /* 輕微縮小 */
-            transition: transform var(--transition-speed);
-        }
-        .qr-code-section:hover {
-            transform: scale(1); /* 鼠標懸停時恢復正常 */
-        }
-        .qr-code-section p {
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-        }
-        /* Removed border-radius and box-shadow for QR code image */
-        .qr-code-section img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px; /* 增加圖片下方間距 */
-            /* border-radius: 5px; <-- REMOVED */
-            /* box-shadow: var(--shadow-light); <-- REMOVED */
-        }
-        .qr-code-section .line-id {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-color-1);
-            margin-top: 15px; /* 調整與上方按鈕的間距 */
-            display: flex; /* 使用 flex 讓文字和按鈕在同一行 */
-            align-items: center; /* 垂直居中 */
-            justify-content: center; /* 水平居中 */
-        }
-        .qr-code-section .line-id i {
-            margin-right: 10px;
-        }
-
-        .join-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-            text-align: left;
-            color: #fff;
-        }
-        .join-step-card {
-            background: rgba(255, 255, 255, 0.15); /* 輕微透明 */
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: var(--shadow-light);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px); /* 增加毛玻璃效果 */
-            transition: transform var(--transition-speed), background var(--transition-speed);
-        }
-        .join-step-card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.25);
-        }
-        .join-step-card h3 {
-            color: #fff;
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-        }
-        .join-step-card h3 i {
-            margin-right: 15px;
-            font-size: 2.2rem;
-            color: var(--accent-color-2);
-        }
-        .join-step-card ul {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 15px;
-        }
-        .join-step-card ul li {
-            margin-bottom: 8px;
-            font-size: 1rem;
-            display: flex;
-            align-items: flex-start; /* 確保文本和圖標對齊 */
-        }
-        .join-step-card ul li i {
-            margin-right: 10px;
-            font-size: 1.1rem;
-            color: var(--accent-color-1);
-            line-height: 1.6; /* 與文本行高一致 */
-        }
-
-        /* Footer */
-        footer {
-            background: var(--dark-bg);
-            color: #ccc;
-            padding: 40px 20px;
-            font-size: 0.9rem;
-            text-align: center;
-            position: relative; /* 確保 z-index 有效 */
-            z-index: 10;
-        }
-        footer i {
-            margin-right: 5px;
-        }
-        footer p.developer-info {
-            margin-bottom: 10px;
-            color: #ddd;
-            font-size: 1rem;
-        }
-
-        /* Back to Top Button */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--primary-color);
-            color: #fff;
-            width: 50px;
-            height: 50px;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
-            box-shadow: var(--shadow-medium);
-            transition: all var(--transition-speed);
-            opacity: 0;
-            visibility: hidden;
-            z-index: 999;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
             cursor: pointer;
+            color: var(--text-main);
+            font-size: 18px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s;
         }
-        .back-to-top.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .back-to-top:hover {
-            background: var(--secondary-color);
-            transform: translateY(-5px) scale(1.1);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) { /* 調整斷點讓雙欄在平板尺寸就開始堆疊 */
-            .hero-content-wrapper {
-                flex-direction: column; /* 垂直堆疊 */
-                text-align: center; /* 文字居中 */
-            }
-            .hero-text-content {
-                min-width: unset; /* 取消最小寬度限制 */
-                width: 100%;
-                margin-bottom: 30px; /* 文字與圖片之間增加間距 */
-            }
-            .hero-image-wrapper {
-                min-width: unset; /* 取消最小寬度限制 */
-                width: 100%;
-                padding-left: 0;
-            }
+        
+        .toggle-bar-btn:hover {
+            background: white;
+            color: var(--primary-color);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px; /* 縮小容器內邊距 */
-            }
+        /* 工具列本體 */
+        .toolbar-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 12px 25px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            max-width: 90vw;
+            scrollbar-width: none; /* Firefox */
+        }
+        .toolbar-container::-webkit-scrollbar { display: none; }
 
-            /* Navbar Adjustments for Mobile */
-            .navbar {
-                padding: 10px 0; /* 縮小 navbar 高度 */
-            }
-            .navbar .container {
-                justify-content: space-between; /* 保持 logo 和 menu-toggle 分散 */
-            }
-            /* 隱藏英文部分，避免在小螢幕溢出 */
-            .navbar .logo .en-logo {
-                display: none;
-            }
-            .navbar .logo {
-                font-size: 1.4rem; /* 調整為只顯示中文時的字體大小 */
-                flex-shrink: 1; /* 允許標誌縮小以避免溢出 */
-                min-width: 0; /* 確保在極端情況下不會保持過寬 */
-                margin-right: 10px; /* 增加與漢堡選單的間距 */
-                white-space: normal; /* 允許標誌文字換行 */
-                line-height: 1.2;
-                text-align: center;
-            }
-
-            .navbar .nav-links {
-                /* 預設隱藏 */
-                display: none; 
-                flex-direction: column;
-                position: fixed; /* 變為固定定位，覆蓋整個螢幕 */
-                top: 0; /* 從頂部開始 */
-                left: 0;
-                width: 100%;
-                height: 100%; /* 全高 */
-                background: rgba(255, 255, 255, 0.98);
-                box-shadow: var(--shadow-medium);
-                padding: 80px 0 20px; /* 為 navbar 騰出空間 */
-                max-height: 100vh; /* 確保可以滾動 */
-                overflow-y: auto; /* 允許在內容過多時滾動 */
-                transition: transform 0.4s ease-out; /* 使用 transform 進行動畫 */
-                transform: translateX(100%); /* 初始時向右隱藏 */
-                z-index: 998; /* 低於 menu-toggle */
-            }
-            /* 菜單展開時的樣式 */
-            .navbar .nav-links.active {
-                display: flex; /* 顯示 */
-                transform: translateX(0); /* 滑入 */
-            }
-            .navbar .nav-links li {
-                margin: 0;
-                width: 100%;
-                text-align: center;
-            }
-            .navbar .nav-links a {
-                display: block;
-                padding: 15px 20px;
-                font-size: 1.2rem;
-                color: var(--dark-bg);
-                border-bottom: 1px solid #f0f0f0;
-            }
-            .navbar .nav-links li:last-child a {
-                border-bottom: none;
-            }
-            .navbar .nav-links a:hover {
-                background: var(--light-bg);
-            }
-            .navbar .nav-links a::after { /* 移除 mobile menu 的下劃線效果 */
-                display: none;
-            }
-
-            /* 顯示漢堡菜單圖標 */
-            .menu-toggle {
-                display: block;
-            }
-            .menu-toggle .fa-times { /* 點擊後變為叉叉 */
-                display: none;
-            }
-            .menu-toggle.active .fa-bars {
-                display: none;
-            }
-            .menu-toggle.active .fa-times {
-                display: block;
-            }
-
-            /* General Sections */
-            section {
-                padding: 60px 0; /* 縮小區塊內邊距 */
-            }
-
-            /* Hero Section specific adjustments */
-            #hero {
-                padding: 80px 20px;
-                min-height: 70vh; /* 在小螢幕上調整最小高度 */
-            }
-            #hero h1 {
-                font-size: clamp(2rem, 6vw, 2.8rem); /* 響應式字體大小 */
-            }
-            #hero h2 {
-                font-size: clamp(1rem, 3vw, 1.5rem); /* 響應式字體大小 */
-            }
-            .hero-image-wrapper {
-                padding-left: 0;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-            h2 {
-                font-size: 2rem;
-            }
-            h3 {
-                font-size: 1.5rem;
-            }
-            p {
-                font-size: 1rem;
-            }
-            .btn {
-                padding: 12px 25px;
-                font-size: 1rem;
-                margin: 15px 8px 0;
-            }
-            .btn-group {
-                display: flex;
-                flex-direction: column; /* 按鈕垂直堆疊 */
-                align-items: center;
-                gap: 10px; /* 按鈕間距 */
-            }
-            .btn-group .btn {
-                margin: 0; /* 重設按鈕的 margin */
-                width: 80%; /* 讓按鈕寬一點 */
-            }
-
-            .features-grid, .choose-grid, .function-list, .join-steps {
-                grid-template-columns: 1fr;
-            }
-            .feature-card, .choose-card, .function-item, .join-step-card {
-                padding: 25px;
-            }
-            .feature-card .icon, .choose-card .icon {
-                font-size: 3rem;
-            }
-            .function-item i {
-                font-size: 1.5rem;
-                margin-right: 15px;
-                min-width: 30px; /* 確保圖標在小屏幕上不會太寬 */
-            }
-            .function-item .content h4 {
-                font-size: 1.2rem;
-            }
-            .function-item .content p, .function-item .content .example {
-                font-size: 0.9rem;
-            }
-
-            .raccoon-smart-tips {
-                padding: 30px;
-                transform: rotateZ(0deg); /* 手機版不傾斜 */
-            }
-            .raccoon-smart-tips h3 {
-                font-size: 1.6rem;
-                margin-bottom: 20px;
-            }
-            .raccoon-smart-tips ul li {
-                font-size: 1rem;
-                margin-bottom: 10px;
-            }
-            .raccoon-smart-tips ul li i {
-                font-size: 1.3rem;
-                margin-right: 10px;
-            }
-
-            .qr-code-section {
-                padding: 30px;
-                transform: scale(1); /* 手機版不縮小 */
-            }
-            .qr-code-section img {
-                max-width: 150px;
-            }
-            .qr-code-section .line-id {
-                font-size: 1.2rem;
-            }
-            /* 在手機版也保持複製按鈕簡潔 */
-            .btn-copy-line-id { 
-                font-size: 1.2rem; /* 確保圖標在小尺寸下足夠大 */
-            }
-
-            .join-step-card h3 i {
-                font-size: 1.8rem;
-            }
-            .join-step-card ul li i {
-                font-size: 1rem;
-            }
-
-            footer {
-                padding: 30px 15px;
-                font-size: 0.85rem;
-            }
-            footer p.developer-info {
-                font-size: 0.9rem;
-            }
-
-            .back-to-top {
-                width: 45px;
-                height: 45px;
-                font-size: 1.2rem;
-                bottom: 20px;
-                right: 20px;
-            }
+        .tool-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #555;
+            min-width: 60px;
+            transition: all 0.2s;
+            position: relative;
         }
 
-        /* For screens up to 480px (e.g., smaller phones) */
-        @media (max-width: 480px) {
-            /* Navbar Logo Optimization */
-            .navbar .logo {
-                font-size: 1.2rem; /* 為只顯示中文調整，確保有足夠空間 */
-                white-space: normal;
-                line-height: 1.2;
-                text-align: center;
-            }
+        .tool-btn:active { transform: scale(0.92); }
+        .tool-btn:hover { color: var(--primary-color); }
+        .tool-btn.danger:hover { color: var(--accent-color); }
 
-            #hero { padding: 60px 15px; min-height: 60vh; }
-            #hero h1 { font-size: clamp(1.8rem, 6.5vw, 2.5rem); } /* 響應式字體大小 */
-            #hero h2 { font-size: clamp(0.9rem, 2.8vw, 1.2rem); } /* 響應式字體大小 */
-            .btn-group .btn { width: 90%; } /* Wider buttons for smaller screens */
+        .tool-icon {
+            font-size: 20px;
+            margin-bottom: 6px;
+            background: rgba(255,255,255,0.6);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        
+        .tool-btn:hover .tool-icon {
+            background: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .tool-btn.danger:hover .tool-icon { border-color: var(--accent-color); color: var(--accent-color); }
 
-            /* General text scaling */
-            h1 { font-size: 2rem; }
-            h2 { font-size: 1.8rem; }
-            h3 { font-size: 1.3rem; }
-            p { font-size: 0.9rem; }
-            .btn { padding: 10px 20px; font-size: 0.9rem; }
-            .feature-card, .choose-card, .function-item, .join-step-card { padding: 20px; }
-            .feature-card .icon, .choose-card .icon { font-size: 2.5rem; }
-            .raccoon-smart-tips h3 { font-size: 1.4rem; }
-            .qr-code-section .line-id { font-size: 1rem; }
-            .qr-code-section img { max-width: 120px; }
+        .tool-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap;}
+
+        /* 背景選單 */
+        .bg-menu {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            left: 0; 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            flex-direction: column;
+            gap: 4px;
+            z-index: 200;
+            min-width: 140px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .bg-menu.show { display: flex; animation: fadeInUp 0.2s; }
+        @keyframes fadeInUp { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+        
+        .bg-option { padding: 8px 12px; cursor: pointer; font-size: 13px; border-radius: 6px; color: #333; transition: 0.2s; }
+        .bg-option:hover { background: #f0f4f8; color: var(--primary-color); font-weight: bold; }
+
+        /* --- Widget 視窗樣式 --- */
+        .widget {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            min-width: 250px;
+            min-height: 150px; /* 預設最小高度 */
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+            border: 1px solid var(--glass-border);
+            overflow: hidden; /* 為了 resize */
+            resize: both;     /* 允許使用者調整大小 */
         }
 
-        /* For even smaller screens (e.g., up to 375px) */
-        @media (max-width: 375px) {
-            /* Navbar Logo Optimization */
-            .navbar .logo {
-                font-size: 1.1rem; /* 更小字體 */
-                line-height: 1.1; /* 調整行高 */
-            }
-
-            #hero h1 { font-size: clamp(1.6rem, 7vw, 2.2rem); } /* 響應式字體大小 */
-            #hero h2 { font-size: clamp(0.8rem, 2.5vw, 1.1rem); } /* 響應式字體大小 */
-            .btn-group .btn { width: 95%; } /* Make buttons nearly full width */
-            
-            /* General text scaling */
-            h1 { font-size: 1.8rem; }
-            h2 { font-size: 1.5rem; }
+        @keyframes popIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
         }
 
-        /* For tiny screens (e.g., up to 320px) */
-        @media (max-width: 320px) {
-            .container {
-                padding: 10px; /* Reduce container padding for tiny screens */
-            }
-            /* Navbar Logo Optimization */
-            .navbar .logo {
-                font-size: 1rem; /* 極小螢幕的最小字體 */
-                line-height: 1; /* 收緊行高 */
-            }
-            #hero h1 { font-size: clamp(1.4rem, 7.5vw, 2rem); } /* 響應式字體大小 */
-            #hero h2 { font-size: clamp(0.7rem, 2.2vw, 0.9rem); } /* 響應式字體大小 */
+        .widget-header {
+            padding: 10px 15px;
+            background: rgba(248, 249, 250, 0.5);
+            cursor: grab;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            flex-shrink: 0; /* 防止 header 被壓縮 */
+        }
+        .widget-header:active { cursor: grabbing; }
+        .widget-title { font-size: 13px; color: #666; font-weight: 700; letter-spacing: 1px; }
+        .header-controls { display: flex; gap: 8px; align-items: center; }
+        .ctrl-btn { cursor: pointer; color: #999; font-size: 14px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.2s; }
+        .ctrl-btn:hover { background: rgba(0,0,0,0.05); color: var(--primary-color); }
+        .close-btn { color: #ff5f57; font-size: 16px; }
+        .close-btn:hover { background: #ff5f57; color: white; }
 
-            /* General text scaling */
-            h1 { font-size: 1.6rem; }
-            h2 { font-size: 1.3rem; }
+        .widget-content {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto; /* 內容過多時滾動 */
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 隱藏捲軸但保留功能 */
+        .widget-content::-webkit-scrollbar { width: 6px; height: 6px; }
+        .widget-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+        /* --- Widget 專屬樣式 --- */
+
+        /* Traffic Light */
+        .traffic-container { display: flex; flex-direction: column; gap: 12px; width: 100%; transition: 0.3s; }
+        .traffic-row { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.5); padding: 5px 10px; border-radius: 30px; }
+        .light { width: 45px; height: 45px; border-radius: 50%; opacity: 0.3; cursor: pointer; border: 2px solid rgba(0,0,0,0.1); transition: all 0.3s; flex-shrink: 0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+        .light.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 15px currentColor, inset 0 -5px 10px rgba(0,0,0,0.2); border-color: transparent;}
+        .traffic-input { flex: 1; border: none; padding: 5px; font-size: 16px; background: transparent; color: var(--text-main); font-weight: 500; }
+        .traffic-hide-text .traffic-input, .traffic-hide-text .traffic-row { background: transparent; padding: 0; width: fit-content; margin: 0 auto; }
+        .traffic-hide-text .traffic-row { gap: 0; }
+        .add-light-btn { font-size: 13px; color: #666; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); padding:6px 12px; border-radius:20px; cursor: pointer; align-self: center; margin-top: 5px; transition: 0.2s;}
+        .add-light-btn:hover { background: white; color: var(--primary-color); }
+
+        /* Text Editor */
+        .text-toolbar { display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; width: 100%; flex-wrap: wrap; }
+        .text-btn { background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #555; }
+        .text-btn:hover { background: #f0f0f0; color: var(--primary-color); }
+        .text-editor { width: 100%; height: 100%; min-height: 120px; overflow-y: auto; outline: none; cursor: text; font-size: 18px; line-height: 1.5; padding: 5px; color: #333; }
+        /* 便利貼顏色 */
+        .bg-color-picker { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); display: inline-block; margin-left: 5px; }
+
+        /* Timer & Stopwatch (優化版) */
+        .timer-wrapper { text-align: center; width: 100%; }
+        .timer-display { 
+            font-size: 4.5rem; 
+            font-weight: 700; 
+            font-variant-numeric: tabular-nums; 
+            margin: 10px 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
+        }
+        .timer-input { 
+            width: 110px; 
+            font-size: 4.5rem; 
+            text-align: center; 
+            border: none; 
+            background: transparent; 
+            color: inherit; 
+            font-family: inherit; 
+            font-weight: inherit;
+            border-bottom: 2px solid transparent;
+            transition: border 0.3s;
+        }
+        .timer-input:focus { border-bottom: 2px solid var(--primary-color); }
+        /* 移除 input type=number 的箭頭 */
+        .timer-input::-webkit-outer-spin-button, .timer-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .timer-controls { display: flex; gap: 15px; justify-content: center; align-items: center; margin-top: 15px;}
+        .timer-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            background: var(--primary-color); 
+            color: white; 
+            font-size: 15px; 
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .timer-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4); }
+        .timer-btn:active { transform: translateY(0); }
+        .timer-btn.reset { background: #e0e0e0; color: #555; box-shadow: none; }
+        .timer-btn.reset:hover { background: #d0d0d0; }
+        
+        /* Draw */
+        .draw-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; }
+        .draw-tools { display: flex; gap: 10px; margin-bottom: 10px; background: #fff; padding: 8px 15px; border-radius: 30px; box-shadow: var(--shadow-sm); }
+        .color-pick { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s;}
+        .color-pick:hover { transform: scale(1.1); }
+        .color-pick.active { transform: scale(1.2); border-color: #333; }
+        .canvas-container { 
+            flex: 1;
+            width: 100%;
+            min-height: 200px;
+            position: relative; 
+            border: 2px dashed #ccc; 
+            border-radius: 10px;
+            overflow: hidden; 
+            background: white; 
+            cursor: crosshair;
+        }
+        canvas { display: block; touch-action: none; }
+
+        /* Randomizer */
+        .randomizer-area { width: 100%; text-align: center; display: flex; flex-direction: column; height: 100%; }
+        .random-result { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            color: var(--primary-color); 
+            min-height: 60px; 
+            margin: 10px 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+        }
+        textarea.names-input { 
+            width: 100%; 
+            flex: 1;
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 10px; 
+            resize: none; 
+            font-size: 14px;
+            background: rgba(255,255,255,0.8);
+        }
+
+        /* Calendar */
+        .calendar-ctrl { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; color: var(--text-main); }
+        .cal-btn { cursor: pointer; padding: 5px 10px; color: var(--primary-color); border-radius: 5px; transition: background 0.2s;}
+        .cal-btn:hover { background: rgba(0,0,0,0.05); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-size: 13px; width: 100%; }
+        .cal-header { font-weight: bold; padding: 8px 0; color: #888; }
+        .cal-day { padding: 8px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .cal-day:hover:not(.empty) { background: #eef2f5; }
+        .cal-day.today { background: var(--primary-color); color: white; font-weight: bold; box-shadow: 0 3px 8px rgba(74, 144, 226, 0.4); }
+
+        /* Scoreboard (Drag & Scroll Optimized) */
+        .score-container { 
+            display: flex; 
+            gap: 15px; 
+            overflow-x: auto; 
+            width: 100%;
+            padding: 10px 5px;
+            align-items: flex-start;
+        }
+        .score-container::-webkit-scrollbar { height: 8px; }
+        .score-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+        .score-team { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background: #fff; 
+            padding: 15px; 
+            border-radius: 12px; 
+            min-width: 120px; 
+            position: relative; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        .score-num { font-size: 3rem; font-weight: 800; margin: 10px 0; color: var(--text-main); line-height: 1; }
+        .score-ctrl button { 
+            width: 32px; height: 32px; 
+            border-radius: 50%; border: none; 
+            background: #f0f0f0; color: #555;
+            cursor: pointer; font-weight: bold; font-size: 16px; margin: 0 3px; transition: 0.2s;
+        }
+        .score-ctrl button:hover { background: var(--primary-color); color: white; transform: scale(1.1); }
+        .score-del { position: absolute; top: 5px; right: 8px; font-size: 12px; color: #ccc; cursor: pointer; padding: 2px;}
+        .score-del:hover { color: var(--accent-color); }
+        .add-team-btn { 
+            margin-top: 10px; font-size: 13px; cursor: pointer; 
+            color: var(--primary-color); border: 1px dashed var(--primary-color); 
+            padding: 8px 15px; border-radius: 20px; background: rgba(255,255,255,0.8); 
+            transition: 0.2s;
+        }
+        .add-team-btn:hover { background: var(--primary-color); color: white; }
+
+        /* 吉祥物 */
+        #mascot {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            width: 120px;
+            height: auto;
+            z-index: 150;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+        }
+        #mascot:hover {
+            filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 15px #ff00de);
+            transform: scale(1.05) rotate(-5deg);
+        }
+
+        /* 版權 */
+        .copyright {
+            position: absolute;
+            bottom: 5px;
+            width: 100%;
+            text-align: center;
+            color: rgba(0, 0, 0, 0.4);
+            font-size: 11px;
+            z-index: 50;
+            font-weight: 600;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <!-- PATCH: 將英文部分用 span 包裹，以便在手機上隱藏 -->
-            <a href="#hero" class="logo">記帳小浣熊<span class="en-logo">Accountant Raccoon</span></a>
-            <!-- Hamburger Menu Toggle -->
-            <div class="menu-toggle" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
-                <i class="fas fa-times"></i>
-            </div>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#hero">首頁</a></li>
-                <li><a href="#core-features">核心亮點</a></li>
-                <li><a href="#features-overview">功能一覽</a></li>
-                <li><a href="#why-choose-us">為什麼選擇我們？</a></li>
-                <li><a href="#join-us">加入我們</a></li>
-            </ul>
+
+    <div id="workspace"></div>
+    
+    <!-- 吉祥物 -->
+    <img src="image/LiyuChillGuy.svg" alt="LiyuChillGuy" id="mascot" title="按我一下!">
+
+    <!-- 背景選單 -->
+    <div id="bgMenu" class="bg-menu">
+        <div class="bg-option" onclick="setBg('image', 1)">🖼️ 背景 1</div>
+        <div class="bg-option" onclick="setBg('image', 2)">🖼️ 背景 2</div>
+        <div class="bg-option" onclick="setBg('image', 3)">🖼️ 背景 3</div>
+        <div class="bg-option" onclick="setBg('image', 4)">🖼️ 背景 4</div>
+        <div class="bg-option" onclick="setBg('image', 5)">🖼️ 背景 5</div>
+        <hr style="margin: 4px 0; border:0; border-top:1px solid #eee;">
+        <div class="bg-option" onclick="setBg('color', '#eef2f5')">🎨 簡約灰白</div>
+        <div class="bg-option" onclick="setBg('color', '#2c3e50')">🌙 深色模式</div>
+        <div class="bg-option" onclick="setBg('color', '#a8e6cf')">🍃 清新綠意</div>
+    </div>
+
+    <div class="toolbar-wrapper" id="toolbarWrapper">
+        <!-- 縮小按鈕 -->
+        <div class="toggle-bar-btn" onclick="toggleToolbar()" title="縮小/展開工具列">
+            <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
         </div>
-    </nav>
 
-    <!-- Hero Section - Rewritten HTML Structure -->
-    <section id="hero">
-        <div class="container hero-content-wrapper">
-            <div class="hero-text-content">
-                <h1 class="reveal">記帳小浣熊，<br>告別枯燥數字，<br>迎接聰明理財，<br>打造創新生活！</h1>
-                <h2 class="reveal">最聰明的AI記帳夥伴，<br>徹底改變你的理財體驗！</h2>
-                <div class="btn-group reveal">
-                    <!-- 立即體驗按鈕直接跳轉至 LINE 加好友 -->
-                    <a href="https://line.me/R/ti/p/@575rjlmq" target="_blank" rel="noopener noreferrer" class="btn"><i class="fab fa-line"></i> 立即體驗</a>
-                    <!-- 了解更多按鈕跳轉至 #core-features -->
-                    <a href="#core-features" class="btn btn-secondary">了解更多 <i class="fas fa-chevron-down"></i></a>
-                </div>
+        <div class="toolbar-container">
+            <div class="tool-btn" id="bgBtn" title="左鍵換圖 / 右鍵選單">
+                <div class="tool-icon"><i class="fa-solid fa-image"></i></div>
+                <span class="tool-label">背景更換</span>
             </div>
-            <div class="hero-image-wrapper">
-                <!-- 英雄區塊圖片：展示理財成功、富裕的感覺 -->
-                <img class="hero-image reveal" alt="一隻可愛的卡通風格浣熊戴著眼鏡，手持計算機，背景是LINE對話框和科技感十足的AI元素，展現理財成功後的輕鬆富裕感。" src="image/Accounting-Raccoon-Rich.png">
+            <div class="tool-btn" onclick="createWidget('randomizer')">
+                <div class="tool-icon"><i class="fa-solid fa-shuffle"></i></div>
+                <span class="tool-label">隨機抽籤</span>
             </div>
-        </div>
-    </section>
-
-    <!-- Core Features Section -->
-    <section id="core-features">
-        <div class="container">
-            <h2 class="reveal">核心亮點，<br>讓記帳變有趣！</h2>
-            <div class="features-grid">
-                <div class="feature-card reveal">
-                    <i class="fas fa-brain icon"></i>
-                    <h3>頂尖 AI 驅動</h3>
-                    <p>接入 Google Gemini，不只精準解析單筆開銷，更能理解複雜指令、支援多筆記帳，讓AI真正成為你的理財顧問！</p>
-                    <span class="example">例：「今天午餐雞排120，晚餐200」 → 自動分拆記錄為兩筆餐飲支出！ <i class="fas fa-arrow-right"></i></span>
-                    <!-- 頂尖 AI 驅動圖片 -->
-                    <img class="card-image" alt="卡通浣熊正在擔憂或思考金錢問題，暗示AI記帳能解決這些煩惱。" src="image/Accounting-Raccoon-Worry.png">
-                </div>
-                <div class="feature-card reveal delay-1">
-                    <i class="fas fa-comment-dots icon"></i>
-                    <h3>聰明又可愛的角色互動</h3>
-                    <p>AI 對話能力大幅提升！非記帳訊息由具「浣熊性格」的 AI 回覆，詞彙庫更豐富，互動更有趣，陪你聊聊生活與金錢哲學，或提供即時理財小建議。</p>
-                    <!-- 聰明又可愛的角色互動圖片 -->
-                    <img class="card-image" alt="可愛的卡通浣熊AI在LINE對話中與用戶互動，展現調皮或貼心的回答。" src="image/Accounting-Raccoon-lineline.png">
-                </div>
-                <div class="feature-card reveal delay-2">
-                    <i class="fab fa-line icon"></i>
-                    <h3>LINE 原生體驗</h3>
-                    <p>告別複雜 App，無需下載，只需在 LINE 對話，就能記帳、查帳、互動。輕量、快速、直覺！</p>
-                    <!-- LINE 原生體驗圖片 -->
-                    <img class="card-image" alt="卡通浣熊在LINE對話界面中輕鬆記帳的場景。" src="image/Accounting-Raccoon-useline.png">
-                </div>
+            <div class="tool-btn" onclick="createWidget('text')">
+                <div class="tool-icon"><i class="fa-solid fa-font"></i></div>
+                <span class="tool-label">文字/公告</span>
             </div>
-        </div>
-    </section>
-
-    <!-- Features Overview Section -->
-    <section id="features-overview">
-        <div class="container">
-            <h2 class="reveal">豐富功能，輕鬆掌握！</h2>
-            <div class="function-list">
-                <div class="function-item reveal">
-                    <i class="fas fa-money-bill-wave" style="color:#dc143c;"></i>
-                    <div class="content">
-                        <h4>快速記帳 (支出)</h4>
-                        <p>輕鬆記錄日常開銷，支援「多筆」同時輸入！</p>
-                        <span class="example">範例：「昨天午餐雞排120，晚餐牛排250」</span>
-                    </div>
-                </div>
-                <div class="function-item reveal delay-1">
-                    <i class="fas fa-hand-holding-usd" style="color:#32cd32;"></i>
-                    <div class="content">
-                        <h4>記錄收入 (進帳)</h4>
-                        <p>清楚記錄每一筆收入，也支援多筆。</p>
-                        <span class="example">範例：「收入薪水30000、兼職5000」</span>
-                    </div>
-                </div>
-                <div class="function-item reveal delay-2">
-                    <i class="fas fa-search-dollar" style="color:#1e90ff;"></i>
-                    <div class="content">
-                        <h4>即時查帳 (AI強化)</h4>
-                        <p>隨時掌握總收入、總支出、餘額，新增「時間範圍」查詢。</p>
-                        <span class="example">範例：「查帳這禮拜的餐飲」、「查詢這個月」</span>
-                    </div>
-                </div>
-                <div class="function-item reveal delay-3">
-                    <i class="fas fa-trash-alt" style="color:#808080;"></i>
-                    <div class="content">
-                        <h4>刪除錯誤記錄</h4>
-                        <p>輕鬆移除最近一筆錯誤記錄。</p>
-                        <span class="example">範例：「刪除」</span>
-                    </div>
-                </div>
-                <div class="function-item reveal delay-4">
-                    <i class="fas fa-question-circle" style="color:#ffd700;"></i>
-                    <div class="content">
-                        <h4>查看指令</h4>
-                        <p>顯示所有可用指令與說明。</p>
-                        <span class="example">範例：「幫助」</span>
-                    </div>
-                </div>
+            <div class="tool-btn" onclick="createWidget('traffic')">
+                <div class="tool-icon"><i class="fa-solid fa-traffic-light"></i></div>
+                <span class="tool-label">紅綠燈</span>
             </div>
-
-            <div class="raccoon-smart-tips reveal delay-5">
-                <h3><i class="fas fa-lightbulb" style="color: var(--accent-color-2);"></i> 浣熊的小聰明</h3>
-                <ul>
-                    <li><i class="fas fa-check-circle"></i> 看到「早餐」、「午餐」、「晚餐」等字眼，會自動歸類為「餐飲」 <i class="fas fa-utensils"></i>。</li>
-                    <li><i class="fas fa-check-circle"></i> 若輸入模糊語句 (如「昨天加油 500」)，也能自動識別日期與分類。</li>
-                    <li><i class="fas fa-check-circle"></i> 能學習你的使用習慣，越記越懂你 <i class="fas fa-brain"></i>。</li>
-                    <li><i class="fas fa-check-circle"></i> 所有記錄都包含「時分秒」，搭配查詢功能讓報表更精準 <i class="fas fa-clock"></i>。</li>
-                </ul>
+            <div class="tool-btn" onclick="createWidget('timer')">
+                <div class="tool-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <span class="tool-label">倒數計時</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('stopwatch')">
+                <div class="tool-icon"><i class="fa-solid fa-stopwatch"></i></div>
+                <span class="tool-label">碼錶</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('clock')">
+                <div class="tool-icon"><i class="fa-regular fa-clock"></i></div>
+                <span class="tool-label">時鐘</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('calendar')">
+                <div class="tool-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <span class="tool-label">日曆</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('scoreboard')">
+                <div class="tool-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <span class="tool-label">記分板</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('dice')">
+                <div class="tool-icon"><i class="fa-solid fa-dice"></i></div>
+                <span class="tool-label">骰子</span>
+            </div>
+            <div class="tool-btn" onclick="createWidget('draw')">
+                <div class="tool-icon"><i class="fa-solid fa-pen-nib"></i></div>
+                <span class="tool-label">畫板</span>
+            </div>
+            <!-- 一鍵清除 -->
+            <div class="tool-btn danger" onclick="clearAllWidgets()" title="清除所有視窗">
+                <div class="tool-icon" style="color: #ff5f57;"><i class="fa-solid fa-trash-can"></i></div>
+                <span class="tool-label">清除全部</span>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Why Choose Us Section -->
-    <section id="why-choose-us">
-        <div class="container">
-            <h2 class="reveal">為什麼選擇記帳小浣熊？</h2>
-            <div class="choose-grid">
-                <div class="choose-card reveal">
-                    <i class="fas fa-cogs icon"></i>
-                    <h3>智慧化</h3>
-                    <p>Gemini AI 大幅強化自然語言解析能力，支援多筆記帳與時間區間查詢，讓記帳和查帳都更智慧、更直覺。</p>
-                </div>
-                <div class="choose-card reveal delay-1">
-                    <i class="fas fa-mobile-alt icon"></i>
-                    <h3>便利性</h3>
-                    <p>LINE 原生操作，隨手記帳不費力，隨時隨地輕鬆管理財務。</p>
-                </div>
-                <div class="choose-card reveal delay-2">
-                    <i class="fas fa-grin-beam icon"></i>
-                    <h3>趣味性</h3>
-                    <p>可愛浣熊互動進化，詞彙更豐富、回應更多樣，讓記帳不再枯燥，而是充滿樂趣的對話與陪伴。</p>
-                </div>
-            </div>
-            <p class="reveal delay-3" style="margin-top: 50px; font-size: 1.2rem; color: var(--dark-bg);">記帳小浣熊，讓理財變得更自然、更有趣。不只是幫你算錢，更幫你理解「錢」這件事。 <i class="fas fa-lightbulb"></i></p>
-        </div>
-    </section>
+    <div class="copyright">
+        Copyright © Liyuchiutiger Gongminshen
+    </div>
 
-    <!-- Join Us Section -->
-    <section id="join-us">
-        <div class="container">
-            <h2 class="reveal">立即加入，<br>開啟你的智慧理財之旅！</h2>
-            <div class="qr-code-section reveal">
-                <p>掃描下方 QR Code 或點擊按鈕，即可立即加入「記帳小浣熊」！</p>
-                <!-- QR Code 圖片 -->
-                <img alt="記帳小浣熊的LINE官方帳號QR碼，邀請用戶掃描加入。" src="image/Accounting-Raccoon-QRcode.png">
-                
-                <!-- 立即加入 LINE 按鈕 (移到 QR Code 下方並置中) -->
-                <a href="https://line.me/R/ti/p/@575rjlmq" target="_blank" rel="noopener noreferrer" class="btn" 
-                   style="background: var(--accent-color-1); margin-top: 20px; margin-bottom: 20px; display: block; max-width: 300px; margin-left: auto; margin-right: auto;">
-                    <i class="fab fa-line"></i> 立即加入 LINE
-                </a>
-
-                <!-- LINE ID 和 複製按鈕 (複製按鈕簡化並移到文字右側) -->
-                <p class="line-id">
-                    <i class="fab fa-line"></i> LINE ID: @575rjlmq 
-                    <button type="button" class="btn btn-copy-line-id" id="copyLineIdBtn">
-                        <i class="far fa-copy"></i>
-                    </button>
-                </p>
-                <p class="copy-success-message" id="copySuccessMessage">已複製！</p>
-            </div>
-
-            <div class="join-steps">
-                <div class="join-step-card reveal">
-                    <h3><i class="fas fa-user-plus"></i> 1. 加入 LINE 機器人</h3>
-                    <p>點擊上方按鈕、搜尋 LINE ID 或掃描 QR Code 輕鬆加入。</p>
-                    <!-- 加入 LINE 機器人步驟圖片 -->
-                    <img class="card-image" alt="卡通浣熊展示如何掃描QR碼加入LINE機器人。" src="image/Accounting-Raccoon-scan.png">
-                </div>
-                <div class="join-step-card reveal delay-1">
-                    <h3><i class="fas fa-pen-to-square"></i> 2. 開始記帳！</h3>
-                    <ul>
-                        <li><i class="fas fa-pizza-slice"></i> 支出範例: 午餐 120、晚餐 200</li>
-                        <li><i class="fas fa-money-bill-alt"></i> 收入範例: 收入 薪水 30000</li>
-                        <li><i class="fas fa-chart-pie"></i> 查詢餘額: 查帳這禮拜</li>
-                        <li><i class="fas fa-eraser"></i> 刪除錯誤: 刪除</li>
-                    </ul>
-                    <!-- 開始記帳步驟圖片 -->
-                    <img class="card-image" alt="卡通浣熊展示在LINE中輸入記帳指令的場景。" src="image/Accounting-Raccoon-write.png">
-                </div>
-                <div class="join-step-card reveal delay-2">
-                    <h3><i class="fas fa-comments"></i> 3. 享受智慧互動</h3>
-                    <p>不只記帳，還能和小浣熊聊聊日常、問理財問題或放空一下，享受更生動的AI陪伴。</p>
-                    <!-- 享受智慧互動步驟圖片 -->
-                    <img class="card-image" alt="卡通浣熊與使用者在LINE對話，展示AI進行有趣的對話、回答理財問題或簡單閒聊的場景。" src="image/Accounting-Raccoon-Work.png">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p class="developer-info">記帳小浣熊Accountant Raccoon<br>開發人員：黃瀚葳、吳鴻斌、陳冠澤<br>新北市立雙溪高級中學</p>
-            <p>Copyright <i class="fas fa-copyright"></i> Liyuchiutiger Gongminshen</p>
-        </div>
-    </footer>
-
-    <!-- Back to Top Button -->
-    <a href="#hero" class="back-to-top" id="backToTopBtn">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-
-    <!-- JavaScript for interactivity -->
     <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                // Only prevent default for internal anchor links, not external LINE links
-                if (this.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
+        const workspace = document.getElementById('workspace');
 
-                    const targetId = this.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
-                    const navLinks = document.getElementById('navLinks');
-                    const menuToggle = document.querySelector('.menu-toggle');
-
-                    if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-
-                        // Close mobile menu if open after clicking a link
-                        if (navLinks.classList.contains('active')) {
-                            navLinks.classList.remove('active');
-                            menuToggle.classList.remove('active');
-                            document.body.style.overflowY = ''; // 恢復滾動
-                        }
-                    } else {
-                        console.error('Target element not found:', targetId);
-                    }
-                }
-            });
-        });
-
-        // Navbar scroll effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) { // 當滾動超過 50px 時
-                navbar.classList.add('scrolled');
+        // --- 工具列縮放功能 ---
+        function toggleToolbar() {
+            const wrapper = document.getElementById('toolbarWrapper');
+            const icon = document.getElementById('toggleIcon');
+            wrapper.classList.toggle('minimized');
+            
+            if (wrapper.classList.contains('minimized')) {
+                icon.className = 'fa-solid fa-chevron-up';
             } else {
-                navbar.classList.remove('scrolled');
+                icon.className = 'fa-solid fa-chevron-down';
             }
-
-            // Back to Top Button visibility
-            const backToTopBtn = document.getElementById('backToTopBtn');
-            if (window.scrollY > 300) { // 當滾動超過 300px 時顯示按鈕
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
-            }
-        });
-
-        // Hamburger Menu Toggle
-        const menuToggle = document.querySelector('.menu-toggle');
-        const navLinks = document.getElementById('navLinks');
-
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuToggle.classList.toggle('active'); // 變換漢堡圖標為叉叉
-            // 防止背景滾動
-            if (navLinks.classList.contains('active')) {
-                document.body.style.overflowY = 'hidden';
-            } else {
-                document.body.style.overflowY = '';
-            }
-        });
-
-        // Copy LINE ID functionality
-        const copyLineIdBtn = document.getElementById('copyLineIdBtn');
-        const copySuccessMessage = document.getElementById('copySuccessMessage');
-        const lineIdToCopy = '@575rjlmq'; // 確保這是你要複製的 LINE ID
-
-        if (copyLineIdBtn) {
-            copyLineIdBtn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(lineIdToCopy);
-                    copySuccessMessage.classList.add('show');
-                    setTimeout(() => {
-                        copySuccessMessage.classList.remove('show');
-                    }, 1000); // 1 秒後隱藏提示
-                } catch (err) {
-                    console.error('Failed to copy LINE ID: ', err);
-                    alert('複製失敗，請手動複製 LINE ID: ' + lineIdToCopy);
-                }
-            });
         }
 
-        // Scroll Reveal Animation (Intersection Observer)
-        document.addEventListener('DOMContentLoaded', () => {
-            const revealElements = document.querySelectorAll('.reveal');
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('reveal-active');
-                        observer.unobserve(entry.target); // 一旦動畫觸發，就不再觀察
-                    }
+        // --- 清除全部視窗 ---
+        function clearAllWidgets() {
+            if(confirm('確定要清除所有小工具嗎？')) {
+                const widgets = document.querySelectorAll('.widget');
+                widgets.forEach(w => {
+                    w.style.transform = 'scale(0.8) opacity(0)';
+                    setTimeout(() => w.remove(), 200);
                 });
-            }, {
-                threshold: 0.1, // 當元素 10% 進入視口時觸發
-                rootMargin: '0px 0px -50px 0px' // 在底部增加一個 50px 的提前量
-            });
+            }
+        }
 
-            revealElements.forEach(element => {
-                // 為 Hero 區塊的元素直接觸發動畫，因為它們是頁面首次載入即應顯示的
-                // 注意這裡的選擇器已經根據新的 HTML 結構進行調整
-                if (element.closest('#hero') && (
-                    element.classList.contains('hero-text-content') || 
-                    element.classList.contains('hero-image-wrapper') || 
-                    element.classList.contains('hero-image') ||
-                    element.tagName === 'H1' || 
-                    element.tagName === 'H2' || 
-                    element.classList.contains('btn-group')
-                )) {
-                    element.classList.add('reveal-active');
-                } else {
-                    observer.observe(element);
-                }
-            });
+        // --- 音效系統 ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const t = audioCtx.currentTime;
+            
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, t);
+                osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
+            } 
+            else if (type === 'pop') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.linearRampToValueAtTime(600, t + 0.1);
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
+                osc.start(t);
+                osc.stop(t + 0.2);
+            }
+            else if (type === 'beep') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, t);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
+            }
+            else if (type === 'alarm') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(440, t);
+                osc.frequency.linearRampToValueAtTime(880, t + 0.5);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 1);
+                osc.start(t);
+                osc.stop(t + 1);
+            }
+            else if (type === 'drum') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, t);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.start(t);
+                osc.stop(t + 0.05);
+            }
+            else if (type === 'tada') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    setTimeout(() => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.value = freq;
+                        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                        o.start(audioCtx.currentTime);
+                        o.stop(audioCtx.currentTime + 0.5);
+                    }, i * 100);
+                });
+            }
+        }
+
+        // --- 背景邏輯 ---
+        const bgBtn = document.getElementById('bgBtn');
+        const bgMenu = document.getElementById('bgMenu');
+        let currentBgIndex = 1;
+
+        bgBtn.addEventListener('click', (e) => {
+            currentBgIndex = (currentBgIndex % 5) + 1;
+            setBg('image', currentBgIndex);
+            bgMenu.classList.remove('show');
         });
+
+        bgBtn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const rect = bgBtn.getBoundingClientRect();
+            bgMenu.style.left = rect.left + 'px';
+            bgMenu.style.bottom = (window.innerHeight - rect.top + 10) + 'px'; // 向上彈出
+            bgMenu.classList.add('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if(!bgBtn.contains(e.target) && !bgMenu.contains(e.target)) {
+                bgMenu.classList.remove('show');
+            }
+        });
+
+        function setBg(type, value) {
+            if(type === 'image') {
+                document.body.style.backgroundImage = `url('background/background00${value}.png')`;
+                document.body.style.backgroundColor = '#eef2f5';
+                currentBgIndex = value;
+            } else {
+                document.body.style.backgroundImage = 'none';
+                document.body.style.backgroundColor = value;
+            }
+            bgMenu.classList.remove('show');
+        }
+
+        // --- Widget Factory ---
+        // 標題對應表
+        const titles = {
+            'randomizer': '隨機抽籤',
+            'text': '文字公告',
+            'traffic': '紅綠燈',
+            'timer': '倒數計時',
+            'stopwatch': '碼錶',
+            'clock': '時鐘',
+            'calendar': '日曆',
+            'scoreboard': '記分板',
+            'dice': '擲骰子',
+            'draw': '畫板'
+        };
+
+        function createWidget(type) {
+            const widget = document.createElement('div');
+            widget.className = 'widget';
+            
+            // 隨機位置，稍微置中
+            const randomX = Math.max(50, Math.random() * (window.innerWidth - 400));
+            const randomY = Math.max(50, Math.random() * (window.innerHeight - 500));
+            widget.style.left = `${randomX}px`;
+            widget.style.top = `${randomY}px`;
+
+            const header = document.createElement('div');
+            header.className = 'widget-header';
+            
+            let extraControls = '';
+            if(type === 'traffic') {
+                extraControls = `<div class="ctrl-btn" onclick="toggleTrafficText(this)" title="顯示/隱藏文字"><i class="fa-solid fa-eye"></i></div>`;
+            }
+
+            header.innerHTML = `
+                <span class="widget-title">${titles[type] || type}</span>
+                <div class="header-controls">
+                    ${extraControls}
+                    <div class="close-btn ctrl-btn" onclick="this.closest('.widget').remove()" title="關閉"><i class="fa-solid fa-xmark"></i></div>
+                </div>`;
+            
+            widget.appendChild(header);
+
+            const content = document.createElement('div');
+            content.className = 'widget-content';
+
+            // --- 內容生成 ---
+            if (type === 'clock') {
+                content.innerHTML = `<div style="font-size:3.8rem; font-weight:800; color:var(--text-main); line-height:1;" class="clock-display">00:00</div>
+                                     <div style="font-size:1.2rem; color:#7f8c8d; margin-top:5px;" class="date-display">...</div>`;
+                startClock(content);
+                widget.style.width = "300px"; widget.style.height = "auto";
+            } 
+            else if (type === 'traffic') {
+                content.innerHTML = `
+                    <div class="traffic-container">
+                        <div class="traffic-row">
+                            <div class="light red" style="background:#ff5f57" onclick="toggleLight(this)"></div>
+                            <input type="text" class="traffic-input" placeholder="禁止 / 安靜">
+                        </div>
+                        <div class="traffic-row">
+                            <div class="light yellow" style="background:#ffbd2e" onclick="toggleLight(this)"></div>
+                            <input type="text" class="traffic-input" placeholder="注意 / 輕聲">
+                        </div>
+                        <div class="traffic-row">
+                            <div class="light green" style="background:#27c93f" onclick="toggleLight(this)"></div>
+                            <input type="text" class="traffic-input" placeholder="開始 / 討論">
+                        </div>
+                    </div>
+                    <button class="add-light-btn" onclick="addCustomLight(this)">+ 新增自訂燈號</button>
+                `;
+            } 
+            else if (type === 'text') {
+                content.innerHTML = `
+                    <div class="text-toolbar">
+                        <button class="text-btn" onclick="formatText(this, 'bold')" title="粗體"><i class="fa-solid fa-bold"></i></button>
+                        <button class="text-btn" onclick="formatText(this, 'italic')" title="斜體"><i class="fa-solid fa-italic"></i></button>
+                        <button class="text-btn" onclick="formatText(this, 'underline')" title="底線"><i class="fa-solid fa-underline"></i></button>
+                        <button class="text-btn" onclick="formatText(this, 'insertOrderedList')" title="編號"><i class="fa-solid fa-list-ol"></i></button>
+                        <select class="text-btn" onchange="formatText(this, 'fontSize', this.value)" style="width:auto; padding:0 5px;">
+                            <option value="3">字號</option><option value="5">大</option><option value="7">特大</option>
+                        </select>
+                        <div style="border-left:1px solid #ddd; margin:0 5px; height:20px; align-self:center;"></div>
+                        <div class="bg-color-picker" style="background:#fff" onclick="setTextBg(this, '#fff')"></div>
+                        <div class="bg-color-picker" style="background:#fff740" onclick="setTextBg(this, '#fff740')"></div>
+                        <div class="bg-color-picker" style="background:#ffccf9" onclick="setTextBg(this, '#ffccf9')"></div>
+                        <div class="bg-color-picker" style="background:#ccf9ff" onclick="setTextBg(this, '#ccf9ff')"></div>
+                    </div>
+                    <div class="text-editor" contenteditable="true">點擊此處開始輸入...</div>
+                `;
+                widget.style.width = "350px"; widget.style.height = "250px";
+            } 
+            else if (type === 'dice') {
+                content.innerHTML = `<div style="font-size:6rem; cursor:pointer; color:var(--primary-color); transition:0.3s;" onclick="rollDice(this)" class="dice-icon"><i class="fa-solid fa-dice-one"></i></div>`;
+            }
+            else if (type === 'timer') {
+                content.innerHTML = `
+                    <div class="timer-wrapper">
+                        <div class="timer-display">
+                             <input type="number" value="05" class="timer-input min" onchange="padTime(this)"><span>:</span>
+                             <input type="number" value="00" class="timer-input sec" onchange="padTime(this)">
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-btn" onclick="timerLogic(this, 'start')"><i class="fa-solid fa-play"></i> 開始</button>
+                            <button class="timer-btn reset" onclick="timerLogic(this, 'reset')"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                    </div>`;
+                widget.style.width = "320px";
+            }
+            else if (type === 'stopwatch') {
+                content.innerHTML = `
+                    <div class="stopwatch-display" style="font-size:3.5rem; font-family:'Courier New', monospace; font-weight:bold; color:#333; margin:10px 0;">00:00.00</div>
+                    <div class="timer-controls">
+                        <button class="timer-btn" onclick="stopwatchLogic(this, 'toggle')"><i class="fa-solid fa-play"></i> 開始</button>
+                        <button class="timer-btn reset" onclick="stopwatchLogic(this, 'reset')"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                `;
+                widget.style.width = "320px";
+            }
+            else if (type === 'draw') {
+                content.innerHTML = `
+                    <div class="draw-wrapper">
+                        <div class="draw-tools">
+                            <div class="color-pick active" style="background:black" onclick="setPen(this, 'black')"></div>
+                            <div class="color-pick" style="background:#ff5f57" onclick="setPen(this, '#ff5f57')"></div>
+                            <div class="color-pick" style="background:#4a90e2" onclick="setPen(this, '#4a90e2')"></div>
+                            <div class="color-pick" style="background:#27c93f" onclick="setPen(this, '#27c93f')"></div>
+                            <div class="color-pick" style="background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#666;" onclick="setPen(this, 'eraser')" title="橡皮擦"><i class="fa-solid fa-eraser"></i></div>
+                            <div class="color-pick" style="background:#f0f0f0; display:flex; align-items:center; justify-content:center; color:#666;" onclick="clearCanvas(this)" title="清空"><i class="fa-solid fa-trash"></i></div>
+                        </div>
+                        <div class="canvas-container"><canvas></canvas></div>
+                    </div>`;
+                widget.style.width = "400px"; widget.style.height = "350px";
+                setTimeout(() => initDraw(content), 100);
+            }
+            else if (type === 'randomizer') {
+                content.innerHTML = `
+                    <div class="randomizer-area">
+                        <div class="random-result"><i class="fa-solid fa-question" style="color:#ccc; font-size:2rem;"></i></div>
+                        <textarea class="names-input" placeholder="在此輸入名單，每行一個名字..." rows="5"></textarea>
+                        <button class="timer-btn" style="margin-top:10px; width:100%; justify-content:center;" onclick="runRandomizer(this)"><i class="fa-solid fa-shuffle"></i> 開始抽籤</button>
+                    </div>`;
+                widget.style.width = "300px"; widget.style.height = "350px";
+            }
+            else if (type === 'calendar') {
+                content.innerHTML = `<div class="cal-container" style="width:100%;"></div>`;
+                initCalendar(content.querySelector('.cal-container'));
+                widget.style.width = "300px";
+            }
+            else if (type === 'scoreboard') {
+                content.innerHTML = `
+                    <div class="score-container">
+                        ${createTeamHTML('第一組')}
+                        ${createTeamHTML('第二組')}
+                        ${createTeamHTML('第三組')}
+                    </div>
+                    <button class="add-team-btn" onclick="addTeam(this)">+ 新增組別</button>
+                `;
+                widget.style.width = "450px"; // 預設寬一點
+                widget.style.height = "280px";
+            }
+
+            widget.appendChild(content);
+            workspace.appendChild(widget);
+            makeDraggable(widget);
+        }
+
+        // --- 功能實作 ---
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = element.querySelector('.widget-header');
+            header.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                
+                // Bring to front
+                document.querySelectorAll('.widget').forEach(w => w.style.zIndex = 10);
+                element.style.zIndex = 100;
+            }
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // 1. Traffic Light
+        function toggleTrafficText(btn) {
+            const container = btn.closest('.widget').querySelector('.traffic-container');
+            const icon = btn.querySelector('i');
+            if (container.classList.contains('traffic-hide-text')) {
+                container.classList.remove('traffic-hide-text');
+                icon.className = 'fa-solid fa-eye';
+                icon.parentElement.title = "隱藏文字";
+            } else {
+                container.classList.add('traffic-hide-text');
+                icon.className = 'fa-solid fa-eye-slash';
+                icon.parentElement.title = "顯示文字";
+            }
+        }
+        function toggleLight(el) {
+            const parent = el.closest('.traffic-container');
+            const allLights = parent.querySelectorAll('.light');
+            const isActive = el.classList.contains('active');
+            allLights.forEach(l => l.classList.remove('active'));
+            if(!isActive) {
+                el.classList.add('active');
+                playSound('click');
+            }
+        }
+        function addCustomLight(btn) {
+            const container = btn.previousElementSibling;
+            const row = document.createElement('div');
+            row.className = 'traffic-row';
+            const colors = ['#9b59b6', '#34495e', '#e67e22', '#1abc9c', '#ff00de'];
+            const color = colors[Math.floor(Math.random()*colors.length)];
+            row.innerHTML = `
+                <div class="light" style="background:${color}" onclick="toggleLight(this)"></div>
+                <input type="text" class="traffic-input" placeholder="自訂事項">
+            `;
+            container.appendChild(row);
+        }
+
+        // 2. Text Editor
+        function formatText(btn, cmd, val=null) {
+            document.execCommand(cmd, false, val);
+            btn.closest('.widget-content').querySelector('.text-editor').focus();
+        }
+        function setTextBg(btn, color) {
+            const content = btn.closest('.widget-content');
+            content.querySelector('.text-editor').style.background = color;
+            if(color !== '#fff') content.querySelector('.text-editor').style.borderRadius = "8px";
+        }
+
+        // 3. Dice
+        function rollDice(el) {
+            const icons = ['fa-dice-one', 'fa-dice-two', 'fa-dice-three', 'fa-dice-four', 'fa-dice-five', 'fa-dice-six'];
+            let count = 0;
+            playSound('click');
+            el.style.transform = 'rotate(360deg) scale(1.2)';
+            const interval = setInterval(() => {
+                el.innerHTML = `<i class="fa-solid ${icons[Math.floor(Math.random()*6)]}"></i>`;
+                count++;
+                if(count%3 === 0) playSound('click'); 
+                if(count > 12) {
+                    clearInterval(interval);
+                    el.style.transform = 'rotate(0deg) scale(1)';
+                    playSound('pop');
+                }
+            }, 50);
+        }
+
+        // 4. Timer
+        function padTime(input) {
+            let val = parseInt(input.value);
+            if(isNaN(val) || val < 0) val = 0;
+            input.value = val.toString().padStart(2,'0');
+        }
+        function timerLogic(btn, action) {
+            const wrapper = btn.closest('.timer-wrapper');
+            const minIn = wrapper.querySelector('.min');
+            const secIn = wrapper.querySelector('.sec');
+            const display = wrapper.querySelector('.timer-display');
+
+            if (action === 'reset') {
+                clearInterval(wrapper.timerId);
+                wrapper.timerId = null;
+                wrapper.querySelector('button i').className = 'fa-solid fa-play';
+                wrapper.querySelector('button').innerHTML = '<i class="fa-solid fa-play"></i> 開始';
+                minIn.disabled = false; secIn.disabled = false;
+                display.style.color = '#333';
+                playSound('click');
+                return;
+            }
+
+            if (wrapper.timerId) {
+                // Pause
+                clearInterval(wrapper.timerId);
+                wrapper.timerId = null;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> 繼續';
+                minIn.disabled = false; secIn.disabled = false;
+            } else {
+                // Start
+                let total = parseInt(minIn.value)*60 + parseInt(secIn.value);
+                if(total <= 0) return;
+                minIn.disabled = true; secIn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i> 暫停';
+                playSound('click');
+
+                wrapper.timerId = setInterval(() => {
+                    if (total <= 0) {
+                        clearInterval(wrapper.timerId);
+                        wrapper.timerId = null;
+                        btn.innerHTML = '<i class="fa-solid fa-play"></i> 開始';
+                        display.style.color = 'var(--accent-color)';
+                        minIn.disabled = false; secIn.disabled = false;
+                        playSound('alarm');
+                        return;
+                    }
+                    total--;
+                    if(total <= 3 && total >= 0) playSound('beep'); 
+                    minIn.value = Math.floor(total/60).toString().padStart(2,'0');
+                    secIn.value = (total%60).toString().padStart(2,'0');
+                }, 1000);
+            }
+        }
+
+        // 5. Stopwatch
+        function stopwatchLogic(btn, action) {
+            const parent = btn.closest('.widget-content');
+            const display = parent.querySelector('.stopwatch-display');
+            if(!parent.swData) parent.swData = { start: 0, elapsed: 0, id: null };
+            const d = parent.swData;
+
+            playSound('click');
+
+            if(action === 'toggle') {
+                if(d.id) {
+                    // Pause
+                    clearInterval(d.id); d.id = null; 
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> 繼續';
+                } else {
+                    // Start
+                    d.start = Date.now() - d.elapsed;
+                    d.id = setInterval(() => {
+                        d.elapsed = Date.now() - d.start;
+                        const min = Math.floor(d.elapsed/60000);
+                        const sec = Math.floor((d.elapsed%60000)/1000);
+                        const ms = Math.floor((d.elapsed%1000)/10);
+                        display.innerText = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`;
+                    }, 10);
+                    btn.innerHTML = '<i class="fa-solid fa-pause"></i> 暫停';
+                }
+            } else {
+                // Reset
+                clearInterval(d.id); d.id = null; d.elapsed = 0;
+                display.innerText = "00:00.00";
+                parent.querySelector('.timer-btn').innerHTML = '<i class="fa-solid fa-play"></i> 開始';
+            }
+        }
+
+        // 6. Draw
+        function initDraw(content) {
+            const container = content.querySelector('.canvas-container');
+            const canvas = container.querySelector('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                // Save content
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+                
+                // Resize
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                // Restore content
+                ctx.drawImage(tempCanvas, 0, 0);
+            }
+            new ResizeObserver(resize).observe(container);
+            
+            let painting = false;
+            let color = 'black';
+            let isEraser = false;
+
+            window.setPen = (el, c) => {
+                el.parentElement.querySelectorAll('.color-pick').forEach(x=>x.classList.remove('active'));
+                el.classList.add('active');
+                isEraser = (c === 'eraser');
+                if(!isEraser) color = c;
+            };
+            
+            window.clearCanvas = (el) => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                playSound('click');
+            };
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function start(e) {
+                if(e.target !== canvas) return;
+                if(e.cancelable) e.preventDefault(); // Prevent scrolling on touch
+                painting = true;
+                draw(e);
+            }
+            function end() { painting = false; ctx.beginPath(); }
+            function draw(e) {
+                if(!painting) return;
+                const pos = getPos(e);
+                
+                ctx.lineWidth = isEraser ? 25 : 4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = isEraser ? '#fff' : color;
+                
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mouseup', end);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseleave', end);
+            
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchend', end);
+            canvas.addEventListener('touchmove', draw, {passive: false});
+        }
+
+        // 7. Randomizer
+        function runRandomizer(btn) {
+            const area = btn.parentElement;
+            const display = area.querySelector('.random-result');
+            const names = area.querySelector('textarea').value.split('\n').filter(n=>n.trim());
+            
+            if(!names.length) {
+                display.innerHTML = '<span style="font-size:1rem; color:red">請輸入名單</span>';
+                return;
+            }
+
+            let c = 0;
+            btn.disabled = true;
+            const timer = setInterval(() => {
+                display.innerText = names[Math.floor(Math.random()*names.length)];
+                c++;
+                playSound('drum');
+                if(c > 20) {
+                    clearInterval(timer);
+                    display.style.transform = "scale(1.3)";
+                    display.style.transition = "0.2s";
+                    setTimeout(()=>display.style.transform="scale(1)", 200);
+                    playSound('tada');
+                    btn.disabled = false;
+                }
+            }, 80);
+        }
+
+        // 8. Calendar
+        function initCalendar(container) {
+            let date = new Date();
+            
+            function render() {
+                const y = date.getFullYear();
+                const m = date.getMonth();
+                const first = new Date(y, m, 1);
+                const last = new Date(y, m+1, 0);
+                
+                let html = `
+                    <div class="calendar-ctrl">
+                        <div class="cal-btn" onclick="changeMonth(this, -1)"><i class="fa-solid fa-chevron-left"></i></div>
+                        <div>${y}年 ${m+1}月</div>
+                        <div class="cal-btn" onclick="changeMonth(this, 1)"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="cal-header">日</div><div class="cal-header">一</div>
+                        <div class="cal-header">二</div><div class="cal-header">三</div>
+                        <div class="cal-header">四</div><div class="cal-header">五</div>
+                        <div class="cal-header">六</div>
+                `;
+                for(let i=0; i<first.getDay(); i++) html += `<div class="cal-day empty"></div>`;
+                
+                const today = new Date();
+                for(let i=1; i<=last.getDate(); i++) {
+                    const isT = (i === today.getDate() && m === today.getMonth() && y === today.getFullYear()) ? 'today' : '';
+                    html += `<div class="cal-day ${isT}">${i}</div>`;
+                }
+                html += `</div>`;
+                container.innerHTML = html;
+                container.currentDate = date; 
+            }
+            
+            window.changeMonth = (btn, delta) => {
+                const c = btn.closest('.cal-container');
+                c.currentDate.setMonth(c.currentDate.getMonth() + delta);
+                date = c.currentDate; 
+                render();
+            };
+            render();
+        }
+
+        // 9. Scoreboard
+        function createTeamHTML(name) {
+            return `
+                <div class="score-team">
+                    <div class="score-del" onclick="this.closest('.score-team').remove()"><i class="fa-solid fa-xmark"></i></div>
+                    <input type="text" value="${name}" style="border:none; text-align:center; font-weight:bold; width:100%; background:transparent; font-size:1.1rem; margin-bottom:5px;">
+                    <div class="score-num">0</div>
+                    <div class="score-ctrl">
+                        <button onclick="modScore(this, -1)">-</button>
+                        <button onclick="modScore(this, 1)">+</button>
+                    </div>
+                </div>
+            `;
+        }
+        function addTeam(btn) {
+            const container = btn.previousElementSibling;
+            const count = container.querySelectorAll('.score-team').length + 1;
+            container.insertAdjacentHTML('beforeend', createTeamHTML(`組別 ${count}`));
+            // Scroll to end
+            setTimeout(() => container.scrollLeft = container.scrollWidth, 100);
+        }
+        function modScore(btn, delta) {
+            const display = btn.parentElement.previousElementSibling;
+            let val = parseInt(display.innerText) + delta;
+            if(val < 0) val = 0;
+            display.innerText = val;
+            if(delta > 0) playSound('pop');
+            else playSound('click');
+        }
+
+        // 10. Clock
+        function startClock(content) {
+            const t = content.querySelector('.clock-display');
+            const d = content.querySelector('.date-display');
+            function update() {
+                const now = new Date();
+                t.innerText = now.toLocaleTimeString('zh-TW', {hour12:false, hour:'2-digit', minute:'2-digit'});
+                d.innerText = now.toLocaleDateString('zh-TW', {month:'long', day:'numeric', weekday:'long'});
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // 吉祥物點擊效果
+        document.getElementById('mascot').addEventListener('click', () => {
+            playSound('tada');
+        });
+
     </script>
 </body>
 </html>
